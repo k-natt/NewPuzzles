@@ -11,7 +11,7 @@ import SwiftUI
 struct NewPuzzlesApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            GameList()
         }
     }
 }
