@@ -68,15 +68,17 @@ struct GameView: View {
                 }
                 ToolbarItemGroup(placement: .bottomBar) {
                     Button {
-                        //
+                        self.frontend.undo()
                     } label: {
                         Label("Undo", systemImage: "arrow.uturn.backward")
                     }
+                    .disabled(!self.frontend.canUndo)
                     Button {
-                        //
+                        self.frontend.redo()
                     } label: {
                         Label("Redo", systemImage: "arrow.uturn.forward")
                     }
+                    .disabled(!self.frontend.canRedo)
                 }
                 ToolbarItem(placement: .bottomBar) {
                     Button {

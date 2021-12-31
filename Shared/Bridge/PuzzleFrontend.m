@@ -170,6 +170,16 @@ void get_random_seed(void **randseed, int *randseedsize) {
     return self.puzzle.game->can_solve && [self startIfNeeded] && midend_status(self.midend) == 0;
 }
 
+- (void)undo {
+    assert(self.canUndo);
+    midend_process_key(self.midend, -1, -1, 'u');
+}
+
+- (void)redo {
+    assert(self.canRedo);
+    midend_process_key(self.midend, -1, -1, 'r' & 0x1F);
+}
+
 - (NSString *)solve {
     const char *s = midend_solve(self.midend);
     if (s) {
@@ -199,8 +209,8 @@ void get_random_seed(void **randseed, int *randseedsize) {
 }
 
 - (void)startTimer {
+    // Gets called every tick.
     if (self.timer) {
-        NSLog(@"Warning: attempted to start timer with one already running");
         return;
     }
     // TODO: May want to get it from UIScreen to support multiple screens?
@@ -232,6 +242,10 @@ void get_random_seed(void **randseed, int *randseedsize) {
     }
     sfree(colors);
     return [mary copy];
+}
+
+- (void)interaction:(int)type at:(CGPoint)point {
+    midend_process_key(self.midend, point.x, point.y, type);
 }
 
 - (void)finish {

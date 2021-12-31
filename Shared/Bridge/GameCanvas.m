@@ -16,14 +16,17 @@
 @property (NS_NONATOMIC_IOSONLY, strong) UIImage *currentCanvas;
 @property (NS_NONATOMIC_IOSONLY, readwrite, strong) NSString *statusText;
 @property (NS_NONATOMIC_IOSONLY, assign) CGSize canvasSize;
-@property (NS_NONATOMIC_IOSONLY, strong) NSTimer *touchTimer;
-@property (NS_NONATOMIC_IOSONLY, strong) BOOL pressIsLong;
-@property (NS_NONATOMIC_IOSONLY, assign) CGPoint mouseDownPoint;
+
+@property (readonly) UIImageView *canvasView;
 
 @property (readonly) UIPanGestureRecognizer *dragGR;
 @property (readonly) UITapGestureRecognizer *tapGR;
 @property (readonly) UILongPressGestureRecognizer *lpGR;
-@property (readonly) UITapGestureRecognizer *doubleTapGR;
+//@property (readonly) UITapGestureRecognizer *doubleTapGR;
+
+// Can't get initial position from drag gesture, so keep track of it ourselves.
+@property (NS_NONATOMIC_IOSONLY, assign) CGPoint initialTouch;
+
 @end
 
 struct blitter {
@@ -41,11 +44,26 @@ struct blitter {
 
     _delegate = delegate;
     _drawing_context = (__bridge void *)self;
+    _canvasView = [[UIImageView alloc] initWithFrame:CGRectZero];
 
+    _tapGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+    _dragGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(drag:)];
+    _lpGR = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+    // Unfortunately waiting for the double tap to fail makes the single tap feel too slow.
+//    _doubleTapGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap:)];
+//    _doubleTapGR.numberOfTapsRequired = 2;
+//    [_tapGR requireGestureRecognizerToFail:_doubleTapGR];
+
+    [_canvasView addGestureRecognizer:_tapGR];
+//    [_canvasView addGestureRecognizer:_doubleTapGR];
+    [_canvasView addGestureRecognizer:_lpGR];
+    [_canvasView addGestureRecognizer:_dragGR];
+
+    [self addSubview:self.canvasView];
     self.backgroundColor = UIColor.blueColor;
     self.contentMode = UIViewContentModeCenter;
+    self.canvasView.userInteractionEnabled = true;
 
-//    _dragGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:<#(nullable SEL)#>]
     return self;
 }
 
@@ -71,32 +89,83 @@ struct blitter {
     } else {
         self.canvasSize = CGSizeZero;
     }
+
+    self.canvasView.bounds = CGRectMake(0, 0, self.canvasSize.width, self.canvasSize.height);
+    self.canvasView.center = self.center;
+
     self.currentCanvas = nil;
     [self.delegate redraw];
 }
 
 - (void)tap:(UITapGestureRecognizer *)gr {
+    assert(gr.state == UIGestureRecognizerStateRecognized);
+    CGPoint touchPoint = [gr locationInView:self.canvasView];
+    NSLog(@"Tap at %@", NSStringFromCGPoint(touchPoint));
+    if (!CGRectContainsPoint(self.canvasView.bounds, touchPoint)) return;
 
-}
-
-- (void)drag:(UIPanGestureRecognizer *)gr {
-
-}
-
-- (void)longPress:(UITapGestureRecognizer *)gr {
-
+    [self.delegate interaction:LEFT_BUTTON at:touchPoint];
+    [self.delegate interaction:LEFT_RELEASE at:touchPoint];
 }
 
 - (void)doubleTap:(UITapGestureRecognizer *)gr {
+    assert(gr.state == UIGestureRecognizerStateRecognized);
+    CGPoint touchPoint = [gr locationInView:self.canvasView];
+    NSLog(@"Double tap at %@", NSStringFromCGPoint(touchPoint));
+    if (!CGRectContainsPoint(self.canvasView.bounds, touchPoint)) return;
 
+    [self.delegate interaction:MIDDLE_BUTTON at:touchPoint];
+    [self.delegate interaction:MIDDLE_RELEASE at:touchPoint];
 }
 
-//- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-//    [super touchesBegan:touches withEvent:event];
-//
-//    self.pressIsLong = false;
-//    self.
-//}
+- (void)longPress:(UITapGestureRecognizer *)gr {
+    CGPoint point = [gr locationInView:self.canvasView];
+
+    NSLog(@"Long press state %d at %@", (int)gr.state, NSStringFromCGPoint(point));
+    switch (gr.state) {
+        case UIGestureRecognizerStateBegan:
+            [self.delegate interaction:RIGHT_BUTTON at:point];
+            break;
+        case UIGestureRecognizerStateChanged:
+            [self.delegate interaction:RIGHT_DRAG at:point];
+            break;
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateFailed:
+        case UIGestureRecognizerStatePossible:
+        default:
+            NSLog(@"Unexpected long press state: %d", (int)gr.state);
+            assert(!"Bad long press state");
+            // fallthrough to stop click
+        case UIGestureRecognizerStateEnded:
+            [self.delegate interaction:RIGHT_RELEASE at:point];
+    }
+}
+
+- (void)drag:(UIPanGestureRecognizer *)gr {
+    CGPoint point = [gr locationInView:self.canvasView];
+    NSLog(@"Drag state %d point %@", (int)gr.state, NSStringFromCGPoint(point));
+    switch (gr.state) {
+        case UIGestureRecognizerStateBegan:
+            [self.delegate interaction:LEFT_BUTTON at:self.initialTouch];
+            // fallthrough
+        case UIGestureRecognizerStateChanged:
+            [self.delegate interaction:LEFT_DRAG at:point];
+            break;
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateFailed:
+        case UIGestureRecognizerStatePossible:
+        default:
+            NSLog(@"Unexpected long press state: %d", (int)gr.state);
+            assert(!"Bad long press state");
+            // fallthrough to stop click
+        case UIGestureRecognizerStateEnded:
+            [self.delegate interaction:LEFT_RELEASE at:point];
+    }
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesBegan:touches withEvent:event];
+    self.initialTouch = [touches.anyObject locationInView:self.canvasView];
+}
 
 @end
 
@@ -123,7 +192,7 @@ UIColor *unpack(float *in) {
 }
 
 static void canvas_draw_text(void *handle, int x, int y, int fonttype, int fontsize, int align, int colour, const char *text) {
-    NSLog(@"Text %s at (%d, %d) color %d", text, x, y, colour);
+//    NSLog(@"Text %s at (%d, %d) color %d", text, x, y, colour);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);
@@ -182,7 +251,7 @@ static void canvas_draw_text(void *handle, int x, int y, int fonttype, int fonts
 }
 
 static void canvas_draw_rect(void *handle, int x, int y, int w, int h, int colour) {
-    NSLog(@"rect(%d, %d, %d, %d) c %d", x, y, w, h, colour);
+//    NSLog(@"rect(%d, %d, %d, %d) c %d", x, y, w, h, colour);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);
@@ -202,7 +271,7 @@ static void canvas_draw_rect(void *handle, int x, int y, int w, int h, int colou
 }
 
 static void canvas_draw_line(void *handle, int x1, int y1, int x2, int y2, int colour) {
-    NSLog(@"line(%d, %d -> %d, %d) c %d", x1, y1, x2, y2, colour);
+//    NSLog(@"line(%d, %d -> %d, %d) c %d", x1, y1, x2, y2, colour);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);
@@ -225,7 +294,7 @@ static void canvas_draw_line(void *handle, int x1, int y1, int x2, int y2, int c
 }
 
 static void canvas_draw_poly(void *handle, const int *coords, int npoints, int fillcolour, int outlinecolour) {
-    NSLog(@"poly(%d points/ %d, %d)", npoints, fillcolour, outlinecolour);
+//    NSLog(@"poly(%d points/ %d, %d)", npoints, fillcolour, outlinecolour);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);
@@ -266,7 +335,7 @@ static void canvas_draw_poly(void *handle, const int *coords, int npoints, int f
 }
 
 static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fillcolour, int outlinecolour) {
-    NSLog(@"circle(%d, %d, %d)", cx, cy, radius);
+//    NSLog(@"circle(%d, %d, %d)", cx, cy, radius);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);
@@ -296,12 +365,12 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
 }
 
 static void canvas_draw_update(void *handle, int x, int y, int w, int h) {
-    NSLog(@"update %d, %d, %d, %d", x, y, w, h);
+//    NSLog(@"update %d, %d, %d, %d", x, y, w, h);
     // Shouldn't need to do anything here, we always update the screen
 }
 
 static void canvas_clip(void *handle, int x, int y, int w, int h) {
-    NSLog(@"clip(%d, %d, %d, %d)", x, y, w, h);
+//    NSLog(@"clip(%d, %d, %d, %d)", x, y, w, h);
 
     CGContextRef context = UIGraphicsGetCurrentContext();
     assert(context);
@@ -309,7 +378,7 @@ static void canvas_clip(void *handle, int x, int y, int w, int h) {
     CGContextClipToRect(context, CGRectMake(x, y, w, h));
 }
 static void canvas_unclip(void *handle) {
-    NSLog(@"unclip");
+//    NSLog(@"unclip");
 
     CGContextRef context = UIGraphicsGetCurrentContext();
     assert(context);
@@ -333,11 +402,11 @@ static void canvas_end_draw(void *handle) {
 
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    canvas.image = canvas.currentCanvas = newImage;
+    canvas.canvasView.image = canvas.currentCanvas = newImage;
 }
 
 static void canvas_status_bar(void *handle, const char *text) {
-    NSLog(@"status %s", text);
+//    NSLog(@"status %s", text);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);
@@ -389,7 +458,7 @@ static void canvas_blitter_load(void *handle, blitter *bl, int x, int y) {
 }
 
 void canvas_draw_thick_line(void *handle, float thickness, float x1, float y1, float x2, float y2, int colour) {
-    NSLog(@"thick line (%f, %f) -> (%f, %f) @ %f px", x1, y1, x2, y2, thickness);
+//    NSLog(@"thick line (%f, %f) -> (%f, %f) @ %f px", x1, y1, x2, y2, thickness);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);

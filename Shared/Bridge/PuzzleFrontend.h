@@ -45,6 +45,9 @@ NS_ASSUME_NONNULL_BEGIN
 // If return value is nonnull, it is an error description for the user.
 - (nullable NSString *)solve;
 
+- (void)undo;
+- (void)redo;
+
 // TODO: Do we really want/need this? Can probably get away without?
 // Must call this once and only once, must not call any other methods afterwards.
 - (void)finish;

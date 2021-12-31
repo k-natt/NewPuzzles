@@ -20,15 +20,13 @@ UIColor *unpack(float *in);
 - (CGSize)resize:(CGSize)size;
 - (void)redraw;
 
-- (void)buttonDown:(int)button at:(CGPoint)point;
-- (void)buttonMoved:(int)button to:(CGPoint)point;
-- (void)buttonUp:(int)button at:(CGPoint)point;
+- (void)interaction:(int)type at:(CGPoint)point;
 
 - (NSArray<UIColor *> *)gameColorList;
 
 @end
 
-@interface GameCanvas : UIImageView
+@interface GameCanvas : UIView
 
 @property (NS_NONATOMIC_IOSONLY, readonly) struct drawing_api dapi;
 @property (NS_NONATOMIC_IOSONLY, readonly) void *drawing_context;
