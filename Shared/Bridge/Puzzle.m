@@ -1,32 +1,13 @@
 //
-//  PuzzleFrontend.m
+//  Puzzle.m
 //  NewPuzzles
 //
-//  Created by Kevin on 12/27/21.
+//  Created by Kevin on 12/28/21.
 //
 
+#import "Puzzle.h"
 #import "PuzzleFrontend.h"
-#import "../puzzles/puzzles.h"
-
-void fatal(const char *fmt, ...) {
-    NSString *newFmt = [NSString stringWithFormat:@"Fatal error: %s", fmt];
-    va_list args;
-    va_start(args, fmt);
-    NSLogv(newFmt, args);
-    va_end(args);
-}
-
-// TODO
-void frontend_default_colour(frontend *fe, float *output) {}
-void deactivate_timer(frontend *fe) {}
-void activate_timer(frontend *fe) {}
-void get_random_seed(void **randseed, int *randseedsize) {}
-
-@interface Puzzle ()
-
-@property (nonatomic, readonly) const game *game;
-
-@end
+#import "puzzles.h"
 
 @implementation Puzzle
 
@@ -61,10 +42,5 @@ void get_random_seed(void **randseed, int *randseedsize) {}
     }
     return nil;
 }
-
-@end
-
-@implementation PuzzleFronted
-
 
 @end

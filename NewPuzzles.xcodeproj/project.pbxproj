@@ -135,6 +135,10 @@
 		0A0AF502277A911100EAC742 /* PuzzleFrontend.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A0AF500277A911100EAC742 /* PuzzleFrontend.m */; };
 		0A0AF505277AA48500EAC742 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 0A0AF504277AA48400EAC742 /* list.c */; };
 		0A0AF506277AA48500EAC742 /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = 0A0AF504277AA48400EAC742 /* list.c */; };
+		0A267917277C3DF2003484A0 /* Puzzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A267916277C3DF2003484A0 /* Puzzle.m */; };
+		0A267918277C3DF2003484A0 /* Puzzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A267916277C3DF2003484A0 /* Puzzle.m */; };
+		0A26791C277E743F003484A0 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A26791B277E743F003484A0 /* GameViewModel.swift */; };
+		0A26791D277E743F003484A0 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A26791B277E743F003484A0 /* GameViewModel.swift */; };
 		0ACA9499277B7A2B00770D32 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9498277B7A2B00770D32 /* GameView.swift */; };
 		0ACA949A277B7A2B00770D32 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9498277B7A2B00770D32 /* GameView.swift */; };
 		0ACA949C277B7E0E00770D32 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA949B277B7E0E00770D32 /* HelpView.swift */; };
@@ -233,6 +237,10 @@
 		0ACA95AB277BBFB100770D32 /* netslide.html in Resources */ = {isa = PBXBuildFile; fileRef = 0ACA9552277BBFB100770D32 /* netslide.html */; };
 		0ACA95AC277BBFB100770D32 /* magnets.html in Resources */ = {isa = PBXBuildFile; fileRef = 0ACA9553277BBFB100770D32 /* magnets.html */; };
 		0ACA95AD277BBFB100770D32 /* magnets.html in Resources */ = {isa = PBXBuildFile; fileRef = 0ACA9553277BBFB100770D32 /* magnets.html */; };
+		0ACA95B0277BC99F00770D32 /* GameCanvas.m in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA95AF277BC99F00770D32 /* GameCanvas.m */; };
+		0ACA95B1277BC99F00770D32 /* GameCanvas.m in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA95AF277BC99F00770D32 /* GameCanvas.m */; };
+		0ACA95B3277BD09600770D32 /* GameCanvasWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA95B2277BD09600770D32 /* GameCanvasWrapper.swift */; };
+		0ACA95B4277BD09600770D32 /* GameCanvasWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA95B2277BD09600770D32 /* GameCanvasWrapper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -313,6 +321,9 @@
 		0A0AF503277A9DF200EAC742 /* Bridging-header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-header.h"; sourceTree = "<group>"; };
 		0A0AF504277AA48400EAC742 /* list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = list.c; sourceTree = "<group>"; };
 		0A0AF507277AA4C600EAC742 /* generated-games.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "generated-games.h"; sourceTree = "<group>"; };
+		0A267915277C3DF2003484A0 /* Puzzle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Puzzle.h; sourceTree = "<group>"; };
+		0A267916277C3DF2003484A0 /* Puzzle.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Puzzle.m; sourceTree = "<group>"; };
+		0A26791B277E743F003484A0 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
 		0ACA9498277B7A2B00770D32 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		0ACA949B277B7E0E00770D32 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		0ACA9520277B94C400770D32 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
@@ -362,6 +373,9 @@
 		0ACA9551277BBFB100770D32 /* blackbox.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = blackbox.html; sourceTree = "<group>"; };
 		0ACA9552277BBFB100770D32 /* netslide.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = netslide.html; sourceTree = "<group>"; };
 		0ACA9553277BBFB100770D32 /* magnets.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = magnets.html; sourceTree = "<group>"; };
+		0ACA95AE277BC99F00770D32 /* GameCanvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameCanvas.h; sourceTree = "<group>"; };
+		0ACA95AF277BC99F00770D32 /* GameCanvas.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameCanvas.m; sourceTree = "<group>"; };
+		0ACA95B2277BD09600770D32 /* GameCanvasWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCanvasWrapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -396,16 +410,17 @@
 		0A0AF425277A7FE200EAC742 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				0A0AF426277A7FE200EAC742 /* NewPuzzlesApp.swift */,
-				0A0AF427277A7FE200EAC742 /* GameList.swift */,
+				0A267914277C39EE003484A0 /* Bridge */,
 				0A0AF428277A7FE300EAC742 /* Assets.xcassets */,
-				0A0AF4FF277A911100EAC742 /* PuzzleFrontend.h */,
-				0A0AF500277A911100EAC742 /* PuzzleFrontend.m */,
 				0A0AF503277A9DF200EAC742 /* Bridging-header.h */,
+				0ACA95B2277BD09600770D32 /* GameCanvasWrapper.swift */,
+				0A0AF427277A7FE200EAC742 /* GameList.swift */,
 				0ACA9498277B7A2B00770D32 /* GameView.swift */,
 				0ACA949B277B7E0E00770D32 /* HelpView.swift */,
+				0A0AF426277A7FE200EAC742 /* NewPuzzlesApp.swift */,
 				0ACA9523277B953D00770D32 /* SafariWrapper.swift */,
 				0ACA9520277B94C400770D32 /* WebView.swift */,
+				0A26791B277E743F003484A0 /* GameViewModel.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -500,6 +515,19 @@
 				0A0AF45C277A811100EAC742 /* untangle.c */,
 			);
 			path = puzzles;
+			sourceTree = "<group>";
+		};
+		0A267914277C39EE003484A0 /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				0ACA95AE277BC99F00770D32 /* GameCanvas.h */,
+				0ACA95AF277BC99F00770D32 /* GameCanvas.m */,
+				0A0AF4FF277A911100EAC742 /* PuzzleFrontend.h */,
+				0A0AF500277A911100EAC742 /* PuzzleFrontend.m */,
+				0A267915277C3DF2003484A0 /* Puzzle.h */,
+				0A267916277C3DF2003484A0 /* Puzzle.m */,
+			);
+			path = Bridge;
 			sourceTree = "<group>";
 		};
 		0ACA9526277BBFB100770D32 /* Help */ = {
@@ -784,6 +812,7 @@
 				0A0AF4FD277A8FA700EAC742 /* printing.c in Sources */,
 				0A0AF495277A811200EAC742 /* samegame.c in Sources */,
 				0A0AF505277AA48500EAC742 /* list.c in Sources */,
+				0ACA95B3277BD09600770D32 /* GameCanvasWrapper.swift in Sources */,
 				0A0AF46F277A811200EAC742 /* palisade.c in Sources */,
 				0A0AF486277A811200EAC742 /* towers.c in Sources */,
 				0A0AF436277A7FE300EAC742 /* NewPuzzlesApp.swift in Sources */,
@@ -799,12 +828,15 @@
 				0A0AF4EA277A8EB100EAC742 /* drawing.c in Sources */,
 				0A0AF47F277A811200EAC742 /* magnets.c in Sources */,
 				0ACA949C277B7E0E00770D32 /* HelpView.swift in Sources */,
+				0A267917277C3DF2003484A0 /* Puzzle.m in Sources */,
 				0A0AF493277A811200EAC742 /* signpost.c in Sources */,
 				0A0AF4E2277A8E7700EAC742 /* laydomino.c in Sources */,
 				0A0AF471277A811200EAC742 /* twiddle.c in Sources */,
 				0A0AF48D277A811200EAC742 /* guess.c in Sources */,
 				0A0AF48F277A811200EAC742 /* net.c in Sources */,
+				0ACA95B0277BC99F00770D32 /* GameCanvas.m in Sources */,
 				0A0AF4F3277A8F2300EAC742 /* tdq.c in Sources */,
+				0A26791C277E743F003484A0 /* GameViewModel.swift in Sources */,
 				0A0AF4D2277A8DFA00EAC742 /* tree234.c in Sources */,
 				0A0AF479277A811200EAC742 /* singles.c in Sources */,
 				0A0AF4D4277A8DFA00EAC742 /* latin.c in Sources */,
@@ -858,6 +890,7 @@
 				0A0AF4FE277A8FA700EAC742 /* printing.c in Sources */,
 				0A0AF4B0277A812800EAC742 /* pegs.c in Sources */,
 				0A0AF506277AA48500EAC742 /* list.c in Sources */,
+				0ACA95B4277BD09600770D32 /* GameCanvasWrapper.swift in Sources */,
 				0A0AF497277A812800EAC742 /* cube.c in Sources */,
 				0A0AF4B5277A812800EAC742 /* tracks.c in Sources */,
 				0A0AF437277A7FE300EAC742 /* NewPuzzlesApp.swift in Sources */,
@@ -873,12 +906,15 @@
 				0A0AF4EB277A8EB100EAC742 /* drawing.c in Sources */,
 				0A0AF4AD277A812800EAC742 /* blackbox.c in Sources */,
 				0ACA949D277B7E0E00770D32 /* HelpView.swift in Sources */,
+				0A267918277C3DF2003484A0 /* Puzzle.m in Sources */,
 				0A0AF4B6277A812800EAC742 /* unequal.c in Sources */,
 				0A0AF4E3277A8E7700EAC742 /* laydomino.c in Sources */,
 				0A0AF4A0277A812800EAC742 /* range.c in Sources */,
 				0A0AF49E277A812800EAC742 /* bridges.c in Sources */,
 				0A0AF4B3277A812800EAC742 /* towers.c in Sources */,
+				0ACA95B1277BC99F00770D32 /* GameCanvas.m in Sources */,
 				0A0AF4F4277A8F2300EAC742 /* tdq.c in Sources */,
+				0A26791D277E743F003484A0 /* GameViewModel.swift in Sources */,
 				0A0AF4D3277A8DFA00EAC742 /* tree234.c in Sources */,
 				0A0AF49B277A812800EAC742 /* singles.c in Sources */,
 				0A0AF4D5277A8DFA00EAC742 /* latin.c in Sources */,

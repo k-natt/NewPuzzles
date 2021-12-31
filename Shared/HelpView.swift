@@ -13,6 +13,8 @@ struct HelpView: View {
 
     @StateObject var navigator: WebViewNavigator
 
+    @Environment(\.dismiss) var dismiss
+
     init(url: URL) {
         self.url = url
         _navigator = StateObject(wrappedValue: WebViewNavigator(initialURL: url))
@@ -21,7 +23,13 @@ struct HelpView: View {
     var body: some View {
         NavigationView {
             WebView(navigator: navigator)
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem {
+                        Button("Done", role: .cancel) {
+                            dismiss.callAsFunction()
+                        }
+                    }
                     ToolbarItemGroup(placement: .navigationBarLeading) {
                         Button {
                             navigator.goBack()
