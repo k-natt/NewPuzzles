@@ -29,6 +29,7 @@ typedef NS_ENUM(NSUInteger, PuzzleFrontendState) {
 @property (NS_NONATOMIC_IOSONLY, assign) PuzzleFrontendState state;
 @property (NS_NONATOMIC_IOSONLY, readwrite, copy) NSArray<PuzzleButton *> *buttons;
 @property (NS_NONATOMIC_IOSONLY, readwrite, copy) NSString *statusText;
+@property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL wantsStatusBar;
 @property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canSolve;
 @property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canUndo;
 @property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canRedo;
@@ -117,6 +118,7 @@ void get_random_seed(void **randseed, int *randseedsize) {
         case PuzzleFrontendStateNotStarted:
             self.canvas = [[GameCanvas alloc] initWithDelegate:self];
             self.midend = midend_new(&_frontend, self.puzzle.game, &game_canvas_dapi, self.canvas.drawing_context);
+            self.wantsStatusBar = midend_wants_statusbar(self.midend);
             midend_new_game(self.midend);
             self.state = PuzzleFrontendStatePlaying;
         case PuzzleFrontendStatePlaying:
@@ -258,7 +260,7 @@ void get_random_seed(void **randseed, int *randseedsize) {
     [self updateUndoRedoSolve];
 }
 
-- (void)updateStatusText:(nonnull NSString *)text {
+- (void)updateStatusText:(NSString *)text {
     self.statusText = text;
 }
 

@@ -145,8 +145,6 @@
 		0ACA949D277B7E0E00770D32 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA949B277B7E0E00770D32 /* HelpView.swift */; };
 		0ACA9521277B94C400770D32 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9520277B94C400770D32 /* WebView.swift */; };
 		0ACA9522277B94C400770D32 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9520277B94C400770D32 /* WebView.swift */; };
-		0ACA9524277B953D00770D32 /* SafariWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9523277B953D00770D32 /* SafariWrapper.swift */; };
-		0ACA9525277B953D00770D32 /* SafariWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9523277B953D00770D32 /* SafariWrapper.swift */; };
 		0ACA9554277BBFB100770D32 /* signpost.html in Resources */ = {isa = PBXBuildFile; fileRef = 0ACA9527277BBFB100770D32 /* signpost.html */; };
 		0ACA9555277BBFB100770D32 /* signpost.html in Resources */ = {isa = PBXBuildFile; fileRef = 0ACA9527277BBFB100770D32 /* signpost.html */; };
 		0ACA9556277BBFB100770D32 /* palisade.html in Resources */ = {isa = PBXBuildFile; fileRef = 0ACA9528277BBFB100770D32 /* palisade.html */; };
@@ -327,7 +325,6 @@
 		0ACA9498277B7A2B00770D32 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		0ACA949B277B7E0E00770D32 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		0ACA9520277B94C400770D32 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
-		0ACA9523277B953D00770D32 /* SafariWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWrapper.swift; sourceTree = "<group>"; };
 		0ACA9527277BBFB100770D32 /* signpost.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = signpost.html; sourceTree = "<group>"; };
 		0ACA9528277BBFB100770D32 /* palisade.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = palisade.html; sourceTree = "<group>"; };
 		0ACA9529277BBFB100770D32 /* map.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = map.html; sourceTree = "<group>"; };
@@ -418,7 +415,6 @@
 				0ACA9498277B7A2B00770D32 /* GameView.swift */,
 				0ACA949B277B7E0E00770D32 /* HelpView.swift */,
 				0A0AF426277A7FE200EAC742 /* NewPuzzlesApp.swift */,
-				0ACA9523277B953D00770D32 /* SafariWrapper.swift */,
 				0ACA9520277B94C400770D32 /* WebView.swift */,
 				0A26791B277E743F003484A0 /* GameViewModel.swift */,
 			);
@@ -822,7 +818,6 @@
 				0A0AF48E277A811200EAC742 /* galaxies.c in Sources */,
 				0A0AF478277A811200EAC742 /* mines.c in Sources */,
 				0A0AF4DE277A8E7700EAC742 /* random.c in Sources */,
-				0ACA9524277B953D00770D32 /* SafariWrapper.swift in Sources */,
 				0A0AF4D8277A8DFA00EAC742 /* penrose.c in Sources */,
 				0A0AF4D6277A8DFA00EAC742 /* matching.c in Sources */,
 				0A0AF4EA277A8EB100EAC742 /* drawing.c in Sources */,
@@ -900,7 +895,6 @@
 				0A0AF4BC277A812800EAC742 /* samegame.c in Sources */,
 				0A0AF49F277A812800EAC742 /* dominosa.c in Sources */,
 				0A0AF4DF277A8E7700EAC742 /* random.c in Sources */,
-				0ACA9525277B953D00770D32 /* SafariWrapper.swift in Sources */,
 				0A0AF4D9277A8DFA00EAC742 /* penrose.c in Sources */,
 				0A0AF4D7277A8DFA00EAC742 /* matching.c in Sources */,
 				0A0AF4EB277A8EB100EAC742 /* drawing.c in Sources */,

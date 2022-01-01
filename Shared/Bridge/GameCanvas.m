@@ -14,7 +14,6 @@
 @property (readonly, strong) NSArray<UIColor *> *colors;
 
 @property (NS_NONATOMIC_IOSONLY, strong) UIImage *currentCanvas;
-@property (NS_NONATOMIC_IOSONLY, readwrite, strong) NSString *statusText;
 @property (NS_NONATOMIC_IOSONLY, assign) CGSize canvasSize;
 
 @property (readonly) UIImageView *canvasView;
@@ -411,9 +410,9 @@ static void canvas_status_bar(void *handle, const char *text) {
     assert(handle);
 
     if (text) {
-        canvas.statusText = [NSString stringWithUTF8String:text];
+        [canvas.delegate updateStatusText:[NSString stringWithUTF8String:text]];
     } else {
-        canvas.statusText = nil;
+        [canvas.delegate updateStatusText:nil];
     }
 }
 

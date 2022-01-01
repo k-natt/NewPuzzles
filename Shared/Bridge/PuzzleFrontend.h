@@ -32,7 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (readonly) NSArray<PuzzleButton *> *buttons;
 
-@property (readonly) NSString *statusText;
+@property (readonly, nullable) NSString *statusText;
+@property (readonly) BOOL wantsStatusBar;
 @property (readonly) BOOL canSolve;
 @property (readonly) BOOL canUndo;
 @property (readonly) BOOL canRedo;

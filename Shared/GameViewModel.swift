@@ -14,6 +14,7 @@ class GameViewModel: ObservableObject {
     let puzzleButtons: [PuzzleButton]
 
     @Published var statusText: String?
+    @Published var wantsStatusBar = false
     @Published var canUndo = false
     @Published var canRedo = false
     @Published var canSolve = false
@@ -36,16 +37,21 @@ class GameViewModel: ObservableObject {
         frontend.publisher(for: \.canRedo).assign(to: &$canRedo)
         frontend.publisher(for: \.canSolve).assign(to: &$canSolve)
         frontend.publisher(for: \.inProgress).assign(to: &$inProgress)
-        frontend.canvas.publisher(for: \.statusText).assign(to: &$statusText)
+        frontend.publisher(for: \.statusText).assign(to: &$statusText)
+        frontend.publisher(for: \.wantsStatusBar).assign(to: &$wantsStatusBar)
 
-        NotificationCenter.default.addObserver( self, selector: #selector(save), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(save(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
 
         if let saveState = saveState {
             frontend.restore(saveState)
         }
     }
 
-    @objc func save(_ notification: NSNotification) {
+    @objc private func save(_ notification: NSNotification) {
+        save()
+    }
+
+    func save() {
         self.saveState = self.frontend.save()
     }
 

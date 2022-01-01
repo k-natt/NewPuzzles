@@ -22,20 +22,8 @@ struct GameView: View {
     var body: some View {
         VStack {
             GameCanvasWrapper(frontend: gameViewModel.frontend)
-            StatusBar(text: gameViewModel.statusText)
-            if (!gameViewModel.puzzleButtons.isEmpty) {
-                HStack {
-                    Spacer()
-                    ForEach(gameViewModel.puzzleButtons, id: \.self) { btn in
-                        Button {
-                            btn.action()
-                        } label: {
-                            Text(btn.label)
-                        }
-                        Spacer()
-                    }
-                }
-            }
+            StatusBar(model: gameViewModel)
+            GameButtons(buttons: gameViewModel.puzzleButtons)
         }
         .navigationTitle(gameViewModel.puzzleName)
         .navigationBarTitleDisplayMode(.inline)
@@ -79,6 +67,31 @@ struct GameView: View {
         .sheet(item: $helpURL) {
             HelpView(url: $0)
         }
+        .onDisappear {
+            gameViewModel.save()
+        }
+    }
+}
+
+private struct GameButtons: View {
+    let buttons: [PuzzleButton]
+
+    var body: some View {
+        if buttons.isEmpty {
+            EmptyView()
+        } else {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 40))]) {
+                ForEach(buttons, id: \.self) { btn in
+                    Button {
+                        btn.action()
+                    } label: {
+                        Text(btn.label)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .padding(.horizontal, 8)
+        }
     }
 }
 
@@ -94,8 +107,6 @@ private struct GameMenuButton: View {
 
     @State var showSheet = false
 
-//    @State var sheetResult: GameMenuResult?
-
     var body: some View {
         Button {
             self.showSheet = true
@@ -106,12 +117,12 @@ private struct GameMenuButton: View {
             Button("New Game", role: .destructive) {
                 model.newGame()
             }
-            Button("Load Game") {
-                //
-            }
-            Button("Load by Seed") {
-                //
-            }
+//            Button("Load Game") {
+//                //
+//            }
+//            Button("Load by Seed") {
+//                //
+//            }
             Button("Restart Game") {
                 model.restartGame()
             }
@@ -120,20 +131,19 @@ private struct GameMenuButton: View {
                     model.solve()
                 }
             }
-            Button("Game Settings") {
-                // NOTE: This overlaps with the bar button item, pick one.
-            }
         }
     }
 }
 
 private struct StatusBar: View {
-    let text: String?
+
+    @ObservedObject var model: GameViewModel
 
     var body: some View {
-        if let text = text {
-            Text(text)
+        if model.wantsStatusBar {
+            Text(model.statusText ?? " ")
                 .padding(8.0)
+                .frame(height: 40)
         } else {
             EmptyView()
         }
@@ -142,6 +152,8 @@ private struct StatusBar: View {
 
 struct GameView_Previews: PreviewProvider {
     static var previews: some View {
-        GameView(gameViewModel: GameViewModel(puzzle: Puzzle.allPuzzles.first!))
+        NavigationView {
+            GameView(gameViewModel: GameViewModel(puzzle: Puzzle.allPuzzles.first!))
+        }
     }
 }
