@@ -21,6 +21,7 @@ UIColor *unpack(float *in);
 - (void)redraw;
 
 - (void)interaction:(int)type at:(CGPoint)point;
+- (void)updateStatusText:(NSString *)text;
 
 - (NSArray<UIColor *> *)gameColorList;
 

@@ -21,7 +21,7 @@ struct GameList: View {
         NavigationView {
             List(Puzzle.allPuzzles, selection: $selectedPuzzle) { puzzle in
                 NavigationLink(tag: puzzle, selection: $selectedPuzzle) {
-                    GameView(frontend: PuzzleFrontend(for: puzzle))
+                    GameView(gameViewModel: GameViewModel(puzzle: puzzle))
                 } label: {
                     Text(puzzle.name)
                 }

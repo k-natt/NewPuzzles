@@ -28,6 +28,12 @@ typedef NS_ENUM(NSUInteger, PuzzleFrontendState) {
 @property (NS_NONATOMIC_IOSONLY, strong) CADisplayLink *timer;
 @property (NS_NONATOMIC_IOSONLY, assign) PuzzleFrontendState state;
 @property (NS_NONATOMIC_IOSONLY, readwrite, copy) NSArray<PuzzleButton *> *buttons;
+@property (NS_NONATOMIC_IOSONLY, readwrite, copy) NSString *statusText;
+@property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canSolve;
+@property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canUndo;
+@property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canRedo;
+@property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL inProgress;
+
 - (void)startTimer;
 - (void)stopTimer;
 
@@ -122,9 +128,6 @@ void get_random_seed(void **randseed, int *randseedsize) {
     }
 }
 
-- (BOOL)wantsStatusBar {
-    return [self startIfNeeded] && midend_wants_statusbar(self.midend);
-}
 - (GameCanvas *)canvas {
     if (!_canvas) [self startIfNeeded];
     return _canvas;
@@ -160,10 +163,12 @@ void get_random_seed(void **randseed, int *randseedsize) {
 - (void)newGame {
     midend_new_game(self.midend);
     midend_redraw(self.midend);
+    [self updateUndoRedoSolve];
 }
 
 - (void)restart {
     midend_restart_game(self.midend);
+    [self updateUndoRedoSolve];
 }
 
 - (BOOL)canSolve {
@@ -173,11 +178,23 @@ void get_random_seed(void **randseed, int *randseedsize) {
 - (void)undo {
     assert(self.canUndo);
     midend_process_key(self.midend, -1, -1, 'u');
+    [self updateUndoRedoSolve];
 }
 
 - (void)redo {
     assert(self.canRedo);
     midend_process_key(self.midend, -1, -1, 'r' & 0x1F);
+    [self updateUndoRedoSolve];
+}
+
+- (void)updateUndoRedoSolve {
+    if (![self startIfNeeded]) {
+        self.inProgress = self.canSolve = self.canUndo = self.canRedo = false;
+    }
+    self.canUndo = midend_can_undo(self.midend);
+    self.canRedo = midend_can_redo(self.midend);
+    self.canSolve = self.puzzle.game->can_solve && midend_status(self.midend) == 0;
+    self.inProgress = midend_status(self.midend) == 0;
 }
 
 - (NSString *)solve {
@@ -187,14 +204,6 @@ void get_random_seed(void **randseed, int *randseedsize) {
     } else {
         return nil;
     }
-}
-
-- (BOOL)canUndo {
-    return [self startIfNeeded] && midend_can_undo(self.midend);
-}
-
-- (BOOL)canRedo {
-    return [self startIfNeeded] && midend_can_redo(self.midend);
 }
 
 - (CGSize)resize:(CGSize)size {
@@ -246,6 +255,50 @@ void get_random_seed(void **randseed, int *randseedsize) {
 
 - (void)interaction:(int)type at:(CGPoint)point {
     midend_process_key(self.midend, point.x, point.y, type);
+    [self updateUndoRedoSolve];
+}
+
+- (void)updateStatusText:(nonnull NSString *)text {
+    self.statusText = text;
+}
+
+void fe_write(void *ctx, const void *buf, int len) {
+    NSMutableData *data = (__bridge NSMutableData *)ctx;
+    [data appendBytes:buf length:len];
+}
+
+- (NSData *)save {
+    if (!self.inProgress) return nil;
+    NSMutableData *data = [NSMutableData new];
+    midend_serialise(self.midend, fe_write, (__bridge void *)data);
+    return [data copy];
+}
+
+struct read_context {
+    NSData *data;
+    NSUInteger pos;
+};
+
+bool fe_read(void *ctx, void *buf, int len) {
+    struct read_context *context = (struct read_context *)ctx;
+    NSRange range = NSMakeRange(context->pos, (NSUInteger)len);
+    if (NSMaxRange(range) > context->data.length) {
+        return false;
+    }
+    [context->data getBytes:buf range:range];
+    context->pos += len;
+    return true;
+}
+
+- (NSString *)restore:(NSData *)save {
+    struct read_context context = {
+        .data = save,
+        .pos = 0,
+    };
+    const char *error = midend_deserialise(self.midend, fe_read, &context);
+    if (error) return [NSString stringWithUTF8String:error];
+    [self updateUndoRedoSolve];
+    return nil;
 }
 
 - (void)finish {

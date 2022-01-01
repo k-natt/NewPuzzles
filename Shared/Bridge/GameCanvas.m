@@ -242,12 +242,12 @@ static void canvas_draw_text(void *handle, int x, int y, int fonttype, int fonts
         origin.x -= size.width;
     }
 
-    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
+//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 
     [string drawAtPoint:origin withAttributes:attributes];
 
-    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
-    after = after;
+//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+//    after = after;
 }
 
 static void canvas_draw_rect(void *handle, int x, int y, int w, int h, int colour) {
@@ -258,7 +258,7 @@ static void canvas_draw_rect(void *handle, int x, int y, int w, int h, int colou
     assert(colour >= 0);
     assert(colour < canvas.colors.count);
 
-    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
+//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 
     CGContextRef context = UIGraphicsGetCurrentContext();
     assert(context);
@@ -266,8 +266,8 @@ static void canvas_draw_rect(void *handle, int x, int y, int w, int h, int colou
     [canvas.colors[colour] setFill];
     CGContextFillRect(context, CGRectMake(x, y, w, h));
 
-    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
-    after = after;
+//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+//    after = after;
 }
 
 static void canvas_draw_line(void *handle, int x1, int y1, int x2, int y2, int colour) {
@@ -281,7 +281,7 @@ static void canvas_draw_line(void *handle, int x1, int y1, int x2, int y2, int c
     CGContextRef context = UIGraphicsGetCurrentContext();
     assert(context);
 
-    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
+//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 
     [canvas.colors[colour] setStroke];
 //    CGContextSetLineWidth(context, 1/UIScreen.mainScreen.nativeScale);
@@ -289,8 +289,8 @@ static void canvas_draw_line(void *handle, int x1, int y1, int x2, int y2, int c
     CGContextAddLineToPoint(context, x2, y2);
     CGContextStrokePath(context);
 
-    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
-    after = after;
+//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+//    after = after;
 }
 
 static void canvas_draw_poly(void *handle, const int *coords, int npoints, int fillcolour, int outlinecolour) {
@@ -314,7 +314,7 @@ static void canvas_draw_poly(void *handle, const int *coords, int npoints, int f
     CGContextRef context = UIGraphicsGetCurrentContext();
     assert(context);
 
-    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
+//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 
     CGContextSetLineWidth(context, 1);
     CGContextAddPath(context, path);
@@ -330,8 +330,8 @@ static void canvas_draw_poly(void *handle, const int *coords, int npoints, int f
 
     CGPathRelease(path);
 
-    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
-    after = after;
+//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+//    after = after;
 }
 
 static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fillcolour, int outlinecolour) {
@@ -348,7 +348,7 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
 
     CGRect bounds = CGRectMake(cx - radius, cy - radius, 2 * radius, 2 * radius);
 
-    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
+//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 
    CGContextSetLineWidth(context, 1);
 
@@ -360,8 +360,8 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
     [canvas.colors[outlinecolour] setStroke];
     CGContextStrokeEllipseInRect(context, bounds);
 
-    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
-    after = after;
+//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+//    after = after;
 }
 
 static void canvas_draw_update(void *handle, int x, int y, int w, int h) {
@@ -406,7 +406,6 @@ static void canvas_end_draw(void *handle) {
 }
 
 static void canvas_status_bar(void *handle, const char *text) {
-//    NSLog(@"status %s", text);
     GameCanvas *canvas = (__bridge GameCanvas *)handle;
 
     assert(handle);

@@ -54,6 +54,6 @@ struct HelpView: View {
 
 struct HelpView_Previews: PreviewProvider {
     static var previews: some View {
-        HelpView(url: Puzzle.allPuzzles.first!.helpURL!)
+        HelpView(url: Bundle.main.url(forResource: Puzzle.allPuzzles.first?.helpName, withExtension: "html")!)
     }
 }

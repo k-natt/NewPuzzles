@@ -31,12 +31,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) GameCanvas *canvas;
 
 @property (readonly) NSArray<PuzzleButton *> *buttons;
-@property (readonly) BOOL wantsStatusBar;
-@property (readonly) BOOL canSolve;
 
-// TODO: make these bindable/KVO-able
+@property (readonly) NSString *statusText;
+@property (readonly) BOOL canSolve;
 @property (readonly) BOOL canUndo;
 @property (readonly) BOOL canRedo;
+@property (readonly) BOOL inProgress;
 
 - (instancetype)init NS_UNAVAILABLE;
 
@@ -44,6 +44,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)restart;
 // If return value is nonnull, it is an error description for the user.
 - (nullable NSString *)solve;
+
+// Returns nil if game is over. No sense saving a failed or won game.
+- (nullable NSData *)save;
+// Returns nil on success, error message on failure.
+- (nullable NSString *)restore:(NSData *)save;
 
 - (void)undo;
 - (void)redo;
