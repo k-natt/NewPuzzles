@@ -259,7 +259,7 @@ unsigned long random_bits(random_state *state, int bits)
      * habit of shifting left by zero instead. We'll shift by
      * bits-1 and then separately shift by one.
      */
-    ret &= (1 << (bits-1)) * 2 - 1;
+    ret &= (1u << (bits-1)) * 2 - 1;
     return ret;
 }
 

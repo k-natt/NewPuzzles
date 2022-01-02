@@ -29,7 +29,6 @@
 @end
 
 struct blitter {
-    // TODO: Make sure ARC handles this as expected
     UIGraphicsImageRenderer *renderer;
     UIImage *savedImage;
     CGPoint savedOrigin;
@@ -48,18 +47,12 @@ struct blitter {
     _tapGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
     _dragGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(drag:)];
     _lpGR = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
-    // Unfortunately waiting for the double tap to fail makes the single tap feel too slow.
-//    _doubleTapGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap:)];
-//    _doubleTapGR.numberOfTapsRequired = 2;
-//    [_tapGR requireGestureRecognizerToFail:_doubleTapGR];
 
     [_canvasView addGestureRecognizer:_tapGR];
-//    [_canvasView addGestureRecognizer:_doubleTapGR];
     [_canvasView addGestureRecognizer:_lpGR];
     [_canvasView addGestureRecognizer:_dragGR];
 
     [self addSubview:self.canvasView];
-    self.backgroundColor = UIColor.blueColor;
     self.contentMode = UIViewContentModeCenter;
     self.canvasView.userInteractionEnabled = true;
 
@@ -347,7 +340,7 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
 
     CGRect bounds = CGRectMake(cx - radius, cy - radius, 2 * radius, 2 * radius);
 
-//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
+    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 
    CGContextSetLineWidth(context, 1);
 
@@ -359,13 +352,19 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
     [canvas.colors[outlinecolour] setStroke];
     CGContextStrokeEllipseInRect(context, bounds);
 
-//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
-//    after = after;
+    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+    after = after;
 }
 
 static void canvas_draw_update(void *handle, int x, int y, int w, int h) {
 //    NSLog(@"update %d, %d, %d, %d", x, y, w, h);
     // Shouldn't need to do anything here, we always update the screen
+    GameCanvas *canvas = (__bridge GameCanvas *)handle;
+
+    assert(handle);
+
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    canvas.canvasView.image = canvas.currentCanvas = newImage;
 }
 
 static void canvas_clip(void *handle, int x, int y, int w, int h) {
@@ -439,6 +438,9 @@ static void canvas_blitter_save(void *handle, blitter *bl, int x, int y) {
         [canvas.currentCanvas drawAtPoint:CGPointMake(-x, -y)];
     }];
     bl->savedOrigin = CGPointMake(x, y);
+//    UIImage *screen = UIGraphicsGetImageFromCurrentImageContext();
+//    UIImage *img = bl->savedImage;
+//    NSLog(@"");
 }
 
 static void canvas_blitter_load(void *handle, blitter *bl, int x, int y) {
@@ -452,7 +454,10 @@ static void canvas_blitter_load(void *handle, blitter *bl, int x, int y) {
         destination = CGPointMake(x, y);
     }
 
+//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
     [bl->savedImage drawAtPoint:destination];
+//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+//    NSLog(@"");
 }
 
 void canvas_draw_thick_line(void *handle, float thickness, float x1, float y1, float x2, float y2, int colour) {

@@ -64,7 +64,9 @@ struct GameView: View {
                     Label("Type", systemImage: "gearshape")
                 }
                 .sheet(isPresented: $showSettings) {
-                    GameSettings(model: gameViewModel, menu: gameViewModel.presetMenu())
+                    NavigationView {
+                        GameSettings(model: gameViewModel, menu: gameViewModel.presetMenu())
+                    }
                 }
             }
         }
