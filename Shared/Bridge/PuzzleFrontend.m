@@ -9,6 +9,7 @@
 #import "GameCanvas.h"
 #import "Puzzle.h"
 #import "puzzles.h"
+#import "PuzzleMenu.h"
 
 struct frontend {
     __unsafe_unretained PuzzleFrontend *self;
@@ -39,7 +40,6 @@ typedef NS_ENUM(NSUInteger, PuzzleFrontendState) {
 - (void)stopTimer;
 
 @end
-
 
 void fatal(const char *fmt, ...) {
     NSString *newFmt = [NSString stringWithFormat:@"Fatal error: %s", fmt];
@@ -217,6 +217,24 @@ void get_random_seed(void **randseed, int *randseedsize) {
 
 - (void)redraw {
     midend_redraw(self.midend);
+}
+
+- (NSArray<PuzzleMenuEntry *> *)menu {
+    [self startIfNeeded];
+    struct preset_menu *menu = midend_get_presets(self.midend, NULL);
+    assert(menu);
+    return [PuzzleMenuEntry parse:menu];
+}
+
+- (void)applyPreset:(PuzzleMenuPreset *)preset {
+    [self startIfNeeded];
+    midend_set_params(self.midend, preset.params);
+    [self newGame];
+}
+
+- (NSInteger)currentPresetId {
+    [self startIfNeeded];
+    return midend_which_preset(self.midend);
 }
 
 - (void)startTimer {

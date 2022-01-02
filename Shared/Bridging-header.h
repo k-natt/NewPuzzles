@@ -11,5 +11,6 @@
 #import "PuzzleFrontend.h"
 #import "GameCanvas.h"
 #import "Puzzle.h"
+#import "PuzzleMenu.h"
 
 #endif /* Bridging_header_h */

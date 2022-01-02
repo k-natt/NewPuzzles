@@ -74,4 +74,16 @@ class GameViewModel: ObservableObject {
     func solve() {
         frontend.solve()
     }
+
+    func presetMenu() -> [PuzzleMenuEntry] {
+        frontend.menu()
+    }
+
+    func selectedPreset() -> Int {
+        frontend.currentPresetId()
+    }
+
+    func updateGameType(to preset: PuzzleMenuPreset) {
+        frontend.apply(preset)
+    }
 }

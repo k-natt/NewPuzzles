@@ -139,6 +139,8 @@
 		0A267918277C3DF2003484A0 /* Puzzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A267916277C3DF2003484A0 /* Puzzle.m */; };
 		0A26791C277E743F003484A0 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A26791B277E743F003484A0 /* GameViewModel.swift */; };
 		0A26791D277E743F003484A0 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A26791B277E743F003484A0 /* GameViewModel.swift */; };
+		0AC0725C278167D900B6B66C /* PuzzleMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0725B278167D900B6B66C /* PuzzleMenu.m */; };
+		0AC0725D278167D900B6B66C /* PuzzleMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0725B278167D900B6B66C /* PuzzleMenu.m */; };
 		0ACA9499277B7A2B00770D32 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9498277B7A2B00770D32 /* GameView.swift */; };
 		0ACA949A277B7A2B00770D32 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9498277B7A2B00770D32 /* GameView.swift */; };
 		0ACA949C277B7E0E00770D32 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA949B277B7E0E00770D32 /* HelpView.swift */; };
@@ -322,6 +324,8 @@
 		0A267915277C3DF2003484A0 /* Puzzle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Puzzle.h; sourceTree = "<group>"; };
 		0A267916277C3DF2003484A0 /* Puzzle.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Puzzle.m; sourceTree = "<group>"; };
 		0A26791B277E743F003484A0 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
+		0AC0725A278167D900B6B66C /* PuzzleMenu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PuzzleMenu.h; sourceTree = "<group>"; };
+		0AC0725B278167D900B6B66C /* PuzzleMenu.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PuzzleMenu.m; sourceTree = "<group>"; };
 		0ACA9498277B7A2B00770D32 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		0ACA949B277B7E0E00770D32 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		0ACA9520277B94C400770D32 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
@@ -522,6 +526,8 @@
 				0A0AF500277A911100EAC742 /* PuzzleFrontend.m */,
 				0A267915277C3DF2003484A0 /* Puzzle.h */,
 				0A267916277C3DF2003484A0 /* Puzzle.m */,
+				0AC0725A278167D900B6B66C /* PuzzleMenu.h */,
+				0AC0725B278167D900B6B66C /* PuzzleMenu.m */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -768,6 +774,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0A0AF492277A811200EAC742 /* unequal.c in Sources */,
+				0AC0725C278167D900B6B66C /* PuzzleMenu.m in Sources */,
 				0A0AF489277A811200EAC742 /* pegs.c in Sources */,
 				0A0AF47D277A811200EAC742 /* map.c in Sources */,
 				0A0AF4E8277A8EB100EAC742 /* dsf.c in Sources */,
@@ -845,6 +852,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0A0AF4B9277A812800EAC742 /* flood.c in Sources */,
+				0AC0725D278167D900B6B66C /* PuzzleMenu.m in Sources */,
 				0A0AF4A7277A812800EAC742 /* mines.c in Sources */,
 				0A0AF4AA277A812800EAC742 /* lightup.c in Sources */,
 				0A0AF4E9277A8EB100EAC742 /* dsf.c in Sources */,

@@ -18,6 +18,7 @@ struct GameView: View {
 
     @State var helpURL: URL? = nil
     @State var showGameMenu = false
+    @State var showSettings = false
 
     var body: some View {
         VStack {
@@ -58,9 +59,12 @@ struct GameView: View {
             }
             ToolbarItem(placement: .bottomBar) {
                 Button {
-                    //
+                    showSettings = true
                 } label: {
                     Label("Type", systemImage: "gearshape")
+                }
+                .sheet(isPresented: $showSettings) {
+                    GameSettings(model: gameViewModel, menu: gameViewModel.presetMenu())
                 }
             }
         }
@@ -69,6 +73,40 @@ struct GameView: View {
         }
         .onDisappear {
             gameViewModel.save()
+        }
+    }
+}
+
+private struct GameSettings: View {
+
+    let model: GameViewModel
+    let menu: [PuzzleMenuEntry]
+
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        List {
+            ForEach(menu, id: \.identifier) {
+                switch $0 {
+                case let preset as PuzzleMenuPreset:
+                    HStack {
+                        Button(preset.title) {
+                            model.updateGameType(to: preset)
+                            dismiss.callAsFunction()
+                        }
+                        if preset.identifier == model.selectedPreset() {
+                            Spacer()
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                case let submenu as PuzzleMenuSubmenu:
+                    NavigationLink(submenu.title) {
+                        GameSettings(model: model, menu: submenu.submenu)
+                    }
+                default:
+                    EmptyView()
+                }
+            }
         }
     }
 }

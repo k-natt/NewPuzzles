@@ -12,12 +12,18 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class Puzzle;
+@class PuzzleMenuEntry;
+@class PuzzleMenuPreset;
 
 @interface PuzzleButton: NSObject
+
 @property (readonly) NSString *label;
 @property (readonly) void(^action)(void);
+
 - (instancetype)init NS_UNAVAILABLE;
+
 @end
+
 
 @interface PuzzleFrontend : NSObject <GameCanvasDelegate>
 
@@ -50,6 +56,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSData *)save;
 // Returns nil on success, error message on failure.
 - (nullable NSString *)restore:(NSData *)save;
+
+- (NSInteger)currentPresetId;
+- (NSArray<PuzzleMenuEntry *> *)menu;
+- (void)applyPreset:(PuzzleMenuPreset *)preset;
 
 - (void)undo;
 - (void)redo;
