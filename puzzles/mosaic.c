@@ -908,6 +908,7 @@ static game_state *dup_game(const game_state *state)
     ret->cheating = state->cheating;
     ret->width = state->width;
     ret->height = state->height;
+    ret->not_completed_clues = state->not_completed_clues;
     ret->cells_contents = snewn(state->height * state->width, char);
     memcpy(ret->cells_contents, state->cells_contents,
            state->height * state->width);

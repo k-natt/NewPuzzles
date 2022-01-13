@@ -11,23 +11,48 @@
 #import "puzzles.h"
 #import "PuzzleMenu.h"
 
+#define AssertOnMain() do { NSAssert(NSThread.isMainThread, @"Not called on main thread"); } while (0)
+#define AssertHasGame() do { NSAssert(self.hasGame, @""); } while (0)
+
+NSString * const PuzzleErrorDomain = @"PuzzleErrorDomain";
+
+extern const game filling;
+
 struct frontend {
     __unsafe_unretained PuzzleFrontend *self;
 };
 
-typedef NS_ENUM(NSUInteger, PuzzleFrontendState) {
-    PuzzleFrontendStateNotStarted,
-    PuzzleFrontendStatePlaying,
-    PuzzleFrontendStateDead,
-};
+void onMain(void(^action)(void)) {
+    if (NSThread.isMainThread) {
+        action();
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            action();
+        });
+    }
+}
+
+@interface NSError (PuzzleError)
++ (instancetype)puzzleErrorWithMessage:(const char *)message;
+@end
+
+@implementation NSError (PuzzleError)
+
++ (instancetype)puzzleErrorWithMessage:(const char *)message {
+    return [self errorWithDomain:PuzzleErrorDomain code:0 userInfo:@{
+        NSLocalizedDescriptionKey: [NSString stringWithUTF8String:message]
+    }];
+}
+
+@end
+
 
 @interface PuzzleFrontend ()
 
 @property (readonly) frontend frontend;
+@property (readonly) NSArray<UIColor *> *gameColorList;
 @property (NS_NONATOMIC_IOSONLY, assign) midend *midend;
-@property (NS_NONATOMIC_IOSONLY, strong) GameCanvas *canvas;
 @property (NS_NONATOMIC_IOSONLY, strong) CADisplayLink *timer;
-@property (NS_NONATOMIC_IOSONLY, assign) PuzzleFrontendState state;
 @property (NS_NONATOMIC_IOSONLY, readwrite, copy) NSArray<PuzzleButton *> *buttons;
 @property (NS_NONATOMIC_IOSONLY, readwrite, copy) NSString *statusText;
 @property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL wantsStatusBar;
@@ -35,6 +60,12 @@ typedef NS_ENUM(NSUInteger, PuzzleFrontendState) {
 @property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canUndo;
 @property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL canRedo;
 @property (NS_NONATOMIC_IOSONLY, readwrite, assign) BOOL inProgress;
+@property (NS_NONATOMIC_IOSONLY, readwrite, assign) PuzzleFrontendStatus status;
+
+//@property (NS_NONATOMIC_IOSONLY, strong) NSTimer *saveTimer;
+@property (NS_NONATOMIC_IOSONLY, assign) BOOL hasGame;
+@property (NS_NONATOMIC_IOSONLY, assign) BOOL hasPendingResize;
+@property (NS_NONATOMIC_IOSONLY, assign) CGSize newSize;
 
 - (void)startTimer;
 - (void)stopTimer;
@@ -69,8 +100,9 @@ void activate_timer(frontend *fe) {
 }
 
 void get_random_seed(void **randseed, int *randseedsize) {
-    if (!randseed || !randseedsize) return;
-    // midend puts it through sha1 so can't get retain than 20 bytes of entropy.
+    NSCParameterAssert(randseed);
+    NSCParameterAssert(randseedsize);
+    // midend puts it through sha1 so won't retain than 20 bytes of entropy.
     *randseedsize = 20;
     *randseed = malloc(*randseedsize);
     arc4random_buf(*randseed, *randseedsize);
@@ -90,53 +122,37 @@ void get_random_seed(void **randseed, int *randseedsize) {
 
 @implementation PuzzleFrontend
 
-+ (PuzzleFrontend *)frontendForPuzzle:(Puzzle *)puzzle {
-    static NSMutableDictionary<NSString *, PuzzleFrontend *> *puzzles;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        puzzles = [NSMutableDictionary new];
-    });
-
-    PuzzleFrontend *fe = puzzles[puzzle.name];
-    if (!fe || fe.state == PuzzleFrontendStateDead) {
-        fe = [[PuzzleFrontend alloc] initWithPuzzle:puzzle];
-        puzzles[puzzle.name] = fe;
-    }
-    return fe;
-}
-
 - (instancetype)initWithPuzzle:(Puzzle *)puzzle {
     self = [super init];
     _puzzle = puzzle;
     _frontend.self = self;
-    // TODO: Restoration?
+    _gameColorList = [self colorsForGame:puzzle.game];
+    _canvas = [[GameCanvas alloc] initWithDelegate:self];
+    _midend = midend_new(&_frontend, puzzle.game, &game_canvas_dapi, _canvas.drawing_context);
+    _hasGame = false;
+    _wantsStatusBar = midend_wants_statusbar(self.midend);
     return self;
 }
 
-- (BOOL)startIfNeeded {
-    switch (self.state) {
-        case PuzzleFrontendStateNotStarted:
-            self.canvas = [[GameCanvas alloc] initWithDelegate:self];
-            self.midend = midend_new(&_frontend, self.puzzle.game, &game_canvas_dapi, self.canvas.drawing_context);
-            self.wantsStatusBar = midend_wants_statusbar(self.midend);
-            midend_new_game(self.midend);
-            self.state = PuzzleFrontendStatePlaying;
-        case PuzzleFrontendStatePlaying:
-            return true;
-        default:
-            NSLog(@"Frontend in invalid state: %lu", (unsigned long)self.state);
-        case PuzzleFrontendStateDead:
-            return false;
+- (NSArray<UIColor *> *)colorsForGame:(const game *)game {
+    int count = 0;
+    // Strictly speaking, we're supposed to go through the midend. But we want
+    // this before creating the midend, and we don't need/want the midend extras.
+//    float *colors = midend_colours(self.midend, &count);
+    float *colors = game->colours(&_frontend, &count);
+    assert(count >= 0);
+    NSMutableArray *mary = [[NSMutableArray alloc] initWithCapacity:count];
+    for (int i = 0; i < count; i++) {
+        NSString *colorName = [NSString stringWithFormat:@"%s_%d", game->htmlhelp_topic, i];
+        UIColor *color = [UIColor colorNamed:colorName];
+        [mary addObject:color ?: unpack(colors+3*i)];
     }
-}
-
-- (GameCanvas *)canvas {
-    if (!_canvas) [self startIfNeeded];
-    return _canvas;
+    sfree(colors);
+    return [mary copy];
 }
 
 - (NSArray<PuzzleButton *> *)buttons {
-    if (_buttons || ![self startIfNeeded]) {
+    if (_buttons) {
         return _buttons;
     }
     NSMutableArray *mary = [NSMutableArray new];
@@ -146,98 +162,127 @@ void get_random_seed(void **randseed, int *randseedsize) {
     key_label *keys = midend_request_keys(self.midend, &nkeys);
     for (int i = 0; i < nkeys; i++) {
         NSString *label = [NSString stringWithUTF8String:keys[i].label];
+        free(keys[i].label);
+
+        if (self.puzzle.game == &filling && [label isEqualToString:@"Clear"]) {
+            // This one doesn't fit and doesn't really matter anyway.
+            continue;
+        }
         int btnId = keys[i].button;
         PuzzleButton *btn = [[PuzzleButton alloc] initWithLabel:label action:^{
-            if (welf && welf.state == PuzzleFrontendStatePlaying) {
+            if (welf) {
                 midend_process_key(welf.midend, 0, 0, btnId);
             }
         }];
         [mary addObject:btn];
-
-        // Seems kinda random but is necessary because of the way things work.
-        free(keys[i].label);
     }
     free(keys);
     _buttons = [mary copy];
     return _buttons;
 }
 
-- (void)newGame {
-    midend_new_game(self.midend);
-    midend_redraw(self.midend);
-    [self updateUndoRedoSolve];
+- (void)newGame:(void (^)(void))completion {
+    AssertOnMain();
+    self.hasGame = false;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        midend_new_game(self.midend);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.hasGame = true;
+            if (self.hasPendingResize) {
+                [self resize:self.newSize];
+                self.hasPendingResize = false;
+            }
+            if (midend_tilesize(self.midend)) {
+                midend_redraw(self.midend);
+            }
+            [self updateProperties];
+            if (completion) completion();
+        });
+    });
 }
 
 - (void)restart {
+    AssertOnMain();
+    AssertHasGame();
     midend_restart_game(self.midend);
-    [self updateUndoRedoSolve];
-}
-
-- (BOOL)canSolve {
-    return self.puzzle.game->can_solve && [self startIfNeeded] && midend_status(self.midend) == 0;
+    [self updateProperties];
 }
 
 - (void)undo {
-    assert(self.canUndo);
-    midend_process_key(self.midend, -1, -1, 'u');
-    [self updateUndoRedoSolve];
+    AssertOnMain();
+    AssertHasGame();
+    NSAssert(self.canUndo, @"Tried to undo while disabled");
+    midend_process_key(self.midend, -1, -1, UI_UNDO);
+    [self updateProperties];
 }
 
 - (void)redo {
-    assert(self.canRedo);
-    midend_process_key(self.midend, -1, -1, 'r' & 0x1F);
-    [self updateUndoRedoSolve];
+    AssertOnMain();
+    AssertHasGame();
+    NSAssert(self.canRedo, @"Tried to redo while disabled");
+    midend_process_key(self.midend, -1, -1, UI_REDO);
+    [self updateProperties];
 }
 
-- (void)updateUndoRedoSolve {
-    if (![self startIfNeeded]) {
-        self.inProgress = self.canSolve = self.canUndo = self.canRedo = false;
+- (BOOL)solveWithError:(NSError **)error {
+    AssertOnMain();
+    AssertHasGame();
+    NSAssert(self.canSolve, @"Tried to solve while disabled");
+    const char *s = midend_solve(self.midend);
+    if (s) {
+        if (error) *error = [NSError puzzleErrorWithMessage:s];
+        return false;
+    } else {
+        return true;
     }
+}
+
+- (void)updateProperties {
+    AssertOnMain();
+    AssertHasGame();
     self.canUndo = midend_can_undo(self.midend);
     self.canRedo = midend_can_redo(self.midend);
-    self.canSolve = self.puzzle.game->can_solve && midend_status(self.midend) == 0;
+    int status = midend_status(self.midend);
+    if (status < 0) self.status = PuzzleFrontendStatusLost;
+    if (status > 0) self.status = PuzzleFrontendStatusWon;
+    if (status == 0) self.status = PuzzleFrontendStatusActive;
+    self.canSolve = self.puzzle.game->can_solve && self.status == PuzzleFrontendStatusActive;
     self.inProgress = midend_status(self.midend) == 0;
 }
 
-- (NSString *)solve {
-    const char *s = midend_solve(self.midend);
-    if (s) {
-        return [NSString stringWithUTF8String:s];
-    } else {
-        return nil;
-    }
-}
+- (void)resize:(CGSize)size {
+    AssertOnMain();
 
-- (CGSize)resize:(CGSize)size {
+    if (!self.hasGame) {
+        self.hasPendingResize = true;
+        self.newSize = size;
+        return;
+    }
+
     int width = (int)size.width;
     int height = (int)size.height;
     midend_size(self.midend, &width, &height, true);
-    return CGSizeMake(width, height);
-}
-
-- (void)redraw {
-    midend_redraw(self.midend);
+    [self.canvas canvasSizeUpdated:CGSizeMake(width, height)];
 }
 
 - (NSArray<PuzzleMenuEntry *> *)menu {
-    [self startIfNeeded];
     struct preset_menu *menu = midend_get_presets(self.midend, NULL);
-    assert(menu);
     return [PuzzleMenuEntry parse:menu];
 }
 
 - (void)applyPreset:(PuzzleMenuPreset *)preset {
-    [self startIfNeeded];
+    AssertOnMain();
+    self.hasGame = false;
     midend_set_params(self.midend, preset.params);
-    [self newGame];
+    [self newGame:^{}];
 }
 
 - (NSInteger)currentPresetId {
-    [self startIfNeeded];
     return midend_which_preset(self.midend);
 }
 
 - (void)startTimer {
+    AssertOnMain();
     // Gets called every tick.
     if (self.timer) {
         return;
@@ -261,25 +306,24 @@ void get_random_seed(void **randseed, int *randseedsize) {
     midend_timer(self.midend, sender.targetTimestamp - sender.timestamp);
 }
 
-- (NSArray<UIColor *> *)gameColorList {
-    int count = 0;
-    float *colors = midend_colours(self.midend, &count);
-    assert(count >= 0);
-    NSMutableArray *mary = [[NSMutableArray alloc] initWithCapacity:count];
-    for (int i = 0; i < count; i++) {
-        [mary addObject:unpack(colors+3*i)];
-    }
-    sfree(colors);
-    return [mary copy];
-}
-
 - (void)interaction:(int)type at:(CGPoint)point {
+    AssertOnMain();
+    AssertHasGame();
     midend_process_key(self.midend, point.x, point.y, type);
-    [self updateUndoRedoSolve];
+    [self updateProperties];
 }
 
 - (void)updateStatusText:(NSString *)text {
+    // May need to handle bg/no game if this gets called while generating.
+    AssertOnMain();
+    AssertHasGame();
     self.statusText = text;
+}
+
+- (void)redraw {
+    AssertOnMain();
+    AssertHasGame();
+    midend_redraw(self.midend);
 }
 
 void fe_write(void *ctx, const void *buf, int len) {
@@ -288,6 +332,8 @@ void fe_write(void *ctx, const void *buf, int len) {
 }
 
 - (NSData *)save {
+    AssertOnMain();
+    AssertHasGame();
     if (!self.inProgress) return nil;
     NSMutableData *data = [NSMutableData new];
     midend_serialise(self.midend, fe_write, (__bridge void *)data);
@@ -310,18 +356,43 @@ bool fe_read(void *ctx, void *buf, int len) {
     return true;
 }
 
-- (NSString *)restore:(NSData *)save {
++ (Puzzle *)identify:(NSData *)save error:(NSErrorPointer)error {
+    AssertOnMain();
     struct read_context context = {
         .data = save,
         .pos = 0,
     };
-    const char *error = midend_deserialise(self.midend, fe_read, &context);
-    if (error) return [NSString stringWithUTF8String:error];
-    [self updateUndoRedoSolve];
-    return nil;
+    char *name;
+    const char *emsg = identify_game(&name, fe_read, &context);
+    Puzzle *puzzle;
+    if (emsg) {
+        if (error) *error = [NSError puzzleErrorWithMessage:emsg];
+    } else {
+        puzzle = [[Puzzle alloc] initWithRawValue:[NSString stringWithUTF8String:name]];
+        if (!puzzle && error) *error = [NSError puzzleErrorWithMessage:"Unknown puzzle type"];
+        sfree(name);
+    }
+    return puzzle;
+}
+
+- (BOOL)restore:(NSData *)save error:(NSErrorPointer)error {
+    AssertOnMain();
+    struct read_context context = {
+        .data = save,
+        .pos = 0,
+    };
+    const char *emsg = midend_deserialise(self.midend, fe_read, &context);
+    if (emsg) {
+        if (error) *error = [NSError puzzleErrorWithMessage:emsg];
+        return false;
+    }
+    self.hasGame = true;
+    [self updateProperties];
+    return true;
 }
 
 - (void)finish {
+    AssertOnMain();
     [self stopTimer];
     // TODO: Save settings/state, stop game(?)
 }

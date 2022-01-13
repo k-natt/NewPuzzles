@@ -2268,8 +2268,14 @@ static char *update_drag_dst(const game_state *state, game_ui *ui,
     if (ui->drag_is_noline) {
         ui->todraw = ntype;
     } else {
-        curr = GRID(state, ui->dragx_src+dx, ui->dragy_src+dy);
-        currl = INDEX(state, lines, ui->dragx_src+dx, ui->dragy_src+dy);
+        int x = ui->dragx_src + dx;
+        int y = ui->dragy_src + dy;
+        if (x >= 0 && x < state->w && y >= 0 && y < state->h) {
+            curr = GRID(state, ui->dragx_src+dx, ui->dragy_src+dy);
+            currl = INDEX(state, lines, ui->dragx_src+dx, ui->dragy_src+dy);
+        } else {
+            curr = currl = 0;
+        }
 
         if (curr & gtype) {
             if (currl == maxb) {
@@ -2289,6 +2295,9 @@ static char *update_drag_dst(const game_state *state, game_ui *ui,
     is = INDEX(state, gridi, ui->dragx_src, ui->dragy_src);
     for (i = 0; i < is->adj.npoints; i++) {
         if (is->adj.points[i].off == 0) continue;
+        int x = is->x + dx;
+        int y = is->y + dy;
+        if (x < 0 || x >= state->w || y < 0 || y >= state->h) continue;
         curr = GRID(state, is->x+dx, is->y+dy);
         if (curr & mtype) continue; /* don't allow changes to marked lines. */
         if (ui->drag_is_noline) {

@@ -43,6 +43,7 @@ struct blitter {
     _delegate = delegate;
     _drawing_context = (__bridge void *)self;
     _canvasView = [[UIImageView alloc] initWithFrame:CGRectZero];
+    _canvasSize = CGSizeMake(100, 100);
 
     _tapGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
     _dragGR = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(drag:)];
@@ -77,11 +78,15 @@ struct blitter {
 
 - (void)resized:(CGSize)newSize {
     if (newSize.width > 0 && newSize.height > 0) {
-        self.canvasSize = [self.delegate resize:newSize];
+        [self.delegate resize:newSize];
     } else {
-        self.canvasSize = CGSizeZero;
+        self.canvasSize = CGSizeMake(100, 100);
     }
 
+}
+
+- (void)canvasSizeUpdated:(CGSize)size {
+    self.canvasSize = size;
     self.canvasView.bounds = CGRectMake(0, 0, self.canvasSize.width, self.canvasSize.height);
     self.canvasView.center = self.center;
 
@@ -92,27 +97,17 @@ struct blitter {
 - (void)tap:(UITapGestureRecognizer *)gr {
     assert(gr.state == UIGestureRecognizerStateRecognized);
     CGPoint touchPoint = [gr locationInView:self.canvasView];
-    NSLog(@"Tap at %@", NSStringFromCGPoint(touchPoint));
+//    NSLog(@"Tap at %@", NSStringFromCGPoint(touchPoint));
     if (!CGRectContainsPoint(self.canvasView.bounds, touchPoint)) return;
 
     [self.delegate interaction:LEFT_BUTTON at:touchPoint];
     [self.delegate interaction:LEFT_RELEASE at:touchPoint];
 }
 
-- (void)doubleTap:(UITapGestureRecognizer *)gr {
-    assert(gr.state == UIGestureRecognizerStateRecognized);
-    CGPoint touchPoint = [gr locationInView:self.canvasView];
-    NSLog(@"Double tap at %@", NSStringFromCGPoint(touchPoint));
-    if (!CGRectContainsPoint(self.canvasView.bounds, touchPoint)) return;
-
-    [self.delegate interaction:MIDDLE_BUTTON at:touchPoint];
-    [self.delegate interaction:MIDDLE_RELEASE at:touchPoint];
-}
-
 - (void)longPress:(UITapGestureRecognizer *)gr {
     CGPoint point = [gr locationInView:self.canvasView];
 
-    NSLog(@"Long press state %d at %@", (int)gr.state, NSStringFromCGPoint(point));
+//    NSLog(@"Long press state %d at %@", (int)gr.state, NSStringFromCGPoint(point));
     switch (gr.state) {
         case UIGestureRecognizerStateBegan:
             [self.delegate interaction:RIGHT_BUTTON at:point];
@@ -125,7 +120,8 @@ struct blitter {
         case UIGestureRecognizerStatePossible:
         default:
             NSLog(@"Unexpected long press state: %d", (int)gr.state);
-            assert(!"Bad long press state");
+            // Don't assert, this seems to happen upon backgrounding occasionally.
+//            NSAssert(false, @"Unexpected long press state: %d", (int)gr.state)
             // fallthrough to stop click
         case UIGestureRecognizerStateEnded:
             [self.delegate interaction:RIGHT_RELEASE at:point];
@@ -134,7 +130,7 @@ struct blitter {
 
 - (void)drag:(UIPanGestureRecognizer *)gr {
     CGPoint point = [gr locationInView:self.canvasView];
-    NSLog(@"Drag state %d point %@", (int)gr.state, NSStringFromCGPoint(point));
+//    NSLog(@"Drag state %d point %@", (int)gr.state, NSStringFromCGPoint(point));
     switch (gr.state) {
         case UIGestureRecognizerStateBegan:
             [self.delegate interaction:LEFT_BUTTON at:self.initialTouch];
@@ -146,8 +142,9 @@ struct blitter {
         case UIGestureRecognizerStateFailed:
         case UIGestureRecognizerStatePossible:
         default:
-            NSLog(@"Unexpected long press state: %d", (int)gr.state);
-            assert(!"Bad long press state");
+            NSLog(@"Unexpected drag state: %d", (int)gr.state);
+            // Don't assert, this seems to happen upon backgrounding occasionally.
+//            NSAssert(false, @"Unexpected drag state: %d", (int)gr.state)
             // fallthrough to stop click
         case UIGestureRecognizerStateEnded:
             [self.delegate interaction:LEFT_RELEASE at:point];
@@ -189,7 +186,7 @@ static void canvas_draw_text(void *handle, int x, int y, int fonttype, int fonts
 
     assert(handle);
     assert(fonttype == FONT_FIXED || fonttype == FONT_VARIABLE);
-    assert(fontsize > 0);
+//    assert(fontsize > 0);
     assert(colour >= 0);
     assert(colour < canvas.colors.count);
     assert(text);
@@ -277,8 +274,8 @@ static void canvas_draw_line(void *handle, int x1, int y1, int x2, int y2, int c
 
     [canvas.colors[colour] setStroke];
 //    CGContextSetLineWidth(context, 1/UIScreen.mainScreen.nativeScale);
-    CGContextMoveToPoint(context, x1, y1);
-    CGContextAddLineToPoint(context, x2, y2);
+    CGContextMoveToPoint(context, x1+0.5, y1+0.5);
+    CGContextAddLineToPoint(context, x2+0.5, y2+0.5);
     CGContextStrokePath(context);
 
 //    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
@@ -297,9 +294,9 @@ static void canvas_draw_poly(void *handle, const int *coords, int npoints, int f
     assert(outlinecolour < canvas.colors.count);
 
     CGMutablePathRef path = CGPathCreateMutable();
-    CGPathMoveToPoint(path, NULL, coords[0], coords[1]);
+    CGPathMoveToPoint(path, NULL, coords[0]+0.5, coords[1]+0.5);
     for (int i = 1; i < npoints; i++) {
-        CGPathAddLineToPoint(path, NULL, coords[2*i], coords[2*i+1]);
+        CGPathAddLineToPoint(path, NULL, coords[2*i]+0.5, coords[2*i+1]+0.5);
     }
     CGPathCloseSubpath(path);
 
@@ -340,7 +337,7 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
 
     CGRect bounds = CGRectMake(cx - radius, cy - radius, 2 * radius, 2 * radius);
 
-    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
+//    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 
    CGContextSetLineWidth(context, 1);
 
@@ -352,8 +349,8 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
     [canvas.colors[outlinecolour] setStroke];
     CGContextStrokeEllipseInRect(context, bounds);
 
-    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
-    after = after;
+//    UIImage *after = UIGraphicsGetImageFromCurrentImageContext();
+//    after = after;
 }
 
 static void canvas_draw_update(void *handle, int x, int y, int w, int h) {
@@ -364,7 +361,13 @@ static void canvas_draw_update(void *handle, int x, int y, int w, int h) {
     assert(handle);
 
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
-    canvas.canvasView.image = canvas.currentCanvas = newImage;
+    if (NSThread.isMainThread) {
+        canvas.canvasView.image = canvas.currentCanvas = newImage;
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            canvas.canvasView.image = canvas.currentCanvas = newImage;
+        });
+    }
 }
 
 static void canvas_clip(void *handle, int x, int y, int w, int h) {
@@ -390,6 +393,7 @@ static void canvas_start_draw(void *handle) {
     assert(handle);
 
     UIGraphicsBeginImageContextWithOptions(canvas.canvasSize, true, 0);
+    assert(UIGraphicsGetCurrentContext());
     [canvas.currentCanvas drawAtPoint:CGPointZero];
 }
 
@@ -400,7 +404,13 @@ static void canvas_end_draw(void *handle) {
 
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    canvas.canvasView.image = canvas.currentCanvas = newImage;
+    if (NSThread.isMainThread) {
+        canvas.canvasView.image = canvas.currentCanvas = newImage;
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            canvas.canvasView.image = canvas.currentCanvas = newImage;
+        });
+    }
 }
 
 static void canvas_status_bar(void *handle, const char *text) {
@@ -437,8 +447,6 @@ static void canvas_blitter_save(void *handle, blitter *bl, int x, int y) {
     bl->savedImage = [bl->renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
         [canvas.currentCanvas drawAtPoint:CGPointMake(-x, -y)];
     }];
-    bl->savedOrigin = CGPointMake(x, y);
-//    UIImage *screen = UIGraphicsGetImageFromCurrentImageContext();
 //    UIImage *img = bl->savedImage;
 //    NSLog(@"");
 }
@@ -474,8 +482,8 @@ void canvas_draw_thick_line(void *handle, float thickness, float x1, float y1, f
 
     CGContextSetLineWidth(context, thickness);
     CGContextBeginPath(context);
-    CGContextMoveToPoint(context, x1, y1);
-    CGContextAddLineToPoint(context, x2, y2);
+    CGContextMoveToPoint(context, x1+0.5, y1+0.5);
+    CGContextAddLineToPoint(context, x2+0.5, y2+0.5);
     CGContextStrokePath(context);
 }
 

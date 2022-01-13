@@ -17,7 +17,8 @@ UIColor *unpack(float *in);
 
 @protocol GameCanvasDelegate <NSObject>
 
-- (CGSize)resize:(CGSize)size;
+// Should call canvasSizeUpdated with the new canvas size.
+- (void)resize:(CGSize)maxSize;
 - (void)redraw;
 
 - (void)interaction:(int)type at:(CGPoint)point;
@@ -33,11 +34,10 @@ UIColor *unpack(float *in);
 @property (NS_NONATOMIC_IOSONLY, readonly) void *drawing_context;
 @property (NS_NONATOMIC_IOSONLY, weak) id<GameCanvasDelegate> delegate;
 
-// Use KVO to get updates.
-@property (NS_NONATOMIC_IOSONLY, readonly, nullable) NSString *statusText;
-
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithDelegate:(id<GameCanvasDelegate>)delegate;
+
+- (void)canvasSizeUpdated:(CGSize)size;
 
 @end
 

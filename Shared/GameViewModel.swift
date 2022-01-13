@@ -13,42 +13,70 @@ class GameViewModel: ObservableObject {
     let puzzleHelpURL: URL?
     let puzzleButtons: [PuzzleButton]
 
-    @Published var statusText: String?
-    @Published var wantsStatusBar = false
-    @Published var canUndo = false
-    @Published var canRedo = false
-    @Published var canSolve = false
-    @Published var inProgress = false
+    @Published private(set) var statusText: String?
+    @Published private(set) var wantsStatusBar = false
+    @Published private(set) var canUndo = false
+    @Published private(set) var canRedo = false
+    @Published private(set) var canSolve = false
+    @Published private(set) var inProgress = false {
+        didSet {
+            if !inProgress {
+                saveState = nil
+            }
+        }
+    }
 
-    @AppStorage("") var saveState: Data?
+    @Published var isLoading = false
+
+    @AppStorage("") private var saveState: Data?
+    @AppStorage("") private var preset: Int = -1
 
     let puzzle: Puzzle
     let frontend: PuzzleFrontend
 
-    init(puzzle: Puzzle) {
+    static func puzzleForSave(_ data: Data) -> Puzzle? {
+        do {
+            return try PuzzleFrontend.identify(data)
+        } catch {
+            NSLog("Error identifying save string: \(error)")
+            return nil
+        }
+    }
+
+    init(puzzle: Puzzle, loadData: Data? = nil) {
         self._saveState = AppStorage("\(puzzle.name)-save")
+        self._preset = AppStorage(wrappedValue: -1, "\(puzzle.name)-preset")
         self.puzzle = puzzle
         self.puzzleName = puzzle.name
-        self.frontend = PuzzleFrontend(for: puzzle)
+        self.frontend = PuzzleFrontend(puzzle: puzzle)
         self.puzzleHelpURL = Bundle.main.url(forResource: puzzle.helpName, withExtension: "html")
         self.puzzleButtons = frontend.buttons
 
-        frontend.publisher(for: \.canUndo).assign(to: &$canUndo)
-        frontend.publisher(for: \.canRedo).assign(to: &$canRedo)
-        frontend.publisher(for: \.canSolve).assign(to: &$canSolve)
-        frontend.publisher(for: \.inProgress).assign(to: &$inProgress)
-        frontend.publisher(for: \.statusText).assign(to: &$statusText)
-        frontend.publisher(for: \.wantsStatusBar).assign(to: &$wantsStatusBar)
+        frontend.publisher(for: \.canUndo).receive(on: DispatchQueue.main).assign(to: &$canUndo)
+        frontend.publisher(for: \.canRedo).receive(on: DispatchQueue.main).assign(to: &$canRedo)
+        frontend.publisher(for: \.canSolve).receive(on: DispatchQueue.main).assign(to: &$canSolve)
+        frontend.publisher(for: \.inProgress).receive(on: DispatchQueue.main).assign(to: &$inProgress)
+        frontend.publisher(for: \.statusText).receive(on: DispatchQueue.main).assign(to: &$statusText)
+        frontend.publisher(for: \.wantsStatusBar).receive(on: DispatchQueue.main).assign(to: &$wantsStatusBar)
 
         NotificationCenter.default.addObserver(self, selector: #selector(save(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
 
-        if let saveState = saveState {
-            frontend.restore(saveState)
+        if let restoreData = loadData ?? saveState {
+            do {
+                try frontend.restore(restoreData)
+            } catch {
+                NSLog("Error restoring game data: \(error)");
+                newGame()
+            }
+        } else {
+            newGame()
         }
     }
 
     @objc private func save(_ notification: NSNotification) {
-        save()
+        if inProgress {
+            save()
+        }
     }
 
     func save() {
@@ -64,7 +92,10 @@ class GameViewModel: ObservableObject {
     }
 
     func newGame() {
-        frontend.newGame()
+        isLoading = true
+        frontend.newGame {
+            self.isLoading = false
+        }
     }
 
     func restartGame() {
@@ -72,7 +103,11 @@ class GameViewModel: ObservableObject {
     }
 
     func solve() {
-        frontend.solve()
+        do {
+            try frontend.solve()
+        } catch {
+            NSLog("Error solving puzzle: \(error)")
+        }
     }
 
     func presetMenu() -> [PuzzleMenuEntry] {
@@ -85,5 +120,17 @@ class GameViewModel: ObservableObject {
 
     func updateGameType(to preset: PuzzleMenuPreset) {
         frontend.apply(preset)
+    }
+
+    deinit {
+        frontend.finish()
+    }
+}
+
+extension GameViewModel {
+    static func foreverALoad() -> GameViewModel {
+        let gvm = GameViewModel(puzzle: Puzzle.allPuzzles.first!)
+        gvm.isLoading = true
+        return gvm
     }
 }

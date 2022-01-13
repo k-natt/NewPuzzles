@@ -11,10 +11,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSString * const PuzzleErrorDomain;
+// No specific codes
+
 @class Puzzle;
 @class PuzzleMenuEntry;
 @class PuzzleMenuPreset;
 
+typedef NSError *_Nullable __autoreleasing *_Nullable NSErrorPointer;
 @interface PuzzleButton: NSObject
 
 @property (readonly) NSString *label;
@@ -24,41 +28,53 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+typedef NS_ENUM(NSUInteger, PuzzleFrontendStatus) {
+    PuzzleFrontendStatusUnloaded,
+    PuzzleFrontendStatusActive,
+    PuzzleFrontendStatusWon,
+    PuzzleFrontendStatusLost,
+};
 
 @interface PuzzleFrontend : NSObject <GameCanvasDelegate>
 
-// Must cache the results because of the way SwiftUI is constantly rebuilding everything.
-// Not thread-safe
-+ (PuzzleFrontend *)frontendForPuzzle:(Puzzle *)puzzle;
+// Must call newGame or restore before playing.
+- (instancetype)initWithPuzzle:(Puzzle *)puzzle;
 
 @property (readonly) Puzzle *puzzle;
 
 // Lazy so we don't start all games at once because SwiftUI instantiates navigation destinations immediately
 @property (readonly) GameCanvas *canvas;
 
+// Static, don't need to KVO
 @property (readonly) NSArray<PuzzleButton *> *buttons;
-
-@property (readonly, nullable) NSString *statusText;
 @property (readonly) BOOL wantsStatusBar;
+
+// KVO-able
+@property (readonly, nullable) NSString *statusText;
 @property (readonly) BOOL canSolve;
 @property (readonly) BOOL canUndo;
 @property (readonly) BOOL canRedo;
 @property (readonly) BOOL inProgress;
+@property (readonly) PuzzleFrontendStatus status;
 
 - (instancetype)init NS_UNAVAILABLE;
 
-- (void)newGame;
+// Generates in the background, calls completion on main queue when done.
+- (void)newGame:(void(^)(void))completion;
 - (void)restart;
 // If return value is nonnull, it is an error description for the user.
-- (nullable NSString *)solve;
+- (BOOL)solveWithError:(NSErrorPointer)error;
 
 // Returns nil if game is over. No sense saving a failed or won game.
 - (nullable NSData *)save;
 // Returns nil on success, error message on failure.
-- (nullable NSString *)restore:(NSData *)save;
+- (BOOL)restore:(NSData *)save error:(NSErrorPointer)error;
++ (nullable Puzzle *)identify:(NSData *)data error:(NSErrorPointer)error;
 
 - (NSInteger)currentPresetId;
 - (NSArray<PuzzleMenuEntry *> *)menu;
+
+// Must call newGame after.
 - (void)applyPreset:(PuzzleMenuPreset *)preset;
 
 - (void)undo;

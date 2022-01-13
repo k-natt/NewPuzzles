@@ -22,10 +22,17 @@ struct GameView: View {
 
     var body: some View {
         VStack {
-            GameCanvasWrapper(frontend: gameViewModel.frontend)
-            StatusBar(model: gameViewModel)
-            GameButtons(buttons: gameViewModel.puzzleButtons)
+            if gameViewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                GameCanvasWrapper(frontend: gameViewModel.frontend)
+                StatusBar(model: gameViewModel)
+                GameButtons(buttons: gameViewModel.puzzleButtons)
+            }
         }
+        .background(Color("default_background"))
         .navigationTitle(gameViewModel.puzzleName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -120,7 +127,9 @@ private struct GameButtons: View {
         if buttons.isEmpty {
             EmptyView()
         } else {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 40))]) {
+//            LazyVGrid(columns: [GridItem(.adaptive(minimum: 40))]) {
+            HStack(alignment: .center, spacing: 8) {
+                Spacer()
                 ForEach(buttons, id: \.self) { btn in
                     Button {
                         btn.action()
@@ -128,6 +137,7 @@ private struct GameButtons: View {
                         Text(btn.label)
                     }
                     .padding(.vertical, 4)
+                    Spacer()
                 }
             }
             .padding(.horizontal, 8)
@@ -184,6 +194,7 @@ private struct StatusBar: View {
             Text(model.statusText ?? " ")
                 .padding(8.0)
                 .frame(height: 40)
+                .foregroundColor(Color("text"))
         } else {
             EmptyView()
         }
@@ -192,6 +203,9 @@ private struct StatusBar: View {
 
 struct GameView_Previews: PreviewProvider {
     static var previews: some View {
+        NavigationView {
+            GameView(gameViewModel: GameViewModel.foreverALoad())
+        }
         NavigationView {
             GameView(gameViewModel: GameViewModel(puzzle: Puzzle.allPuzzles.first!))
         }
