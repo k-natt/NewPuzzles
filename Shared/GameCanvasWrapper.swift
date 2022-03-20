@@ -11,7 +11,9 @@ import SwiftUI
 struct GameCanvasWrapper: UIViewRepresentable {
     let frontend: PuzzleFrontend
 
-    func updateUIView(_ uiView: UIViewType, context: Context) {}
+    func updateUIView(_ uiView: UIViewType, context: Context) {
+        frontend.redraw()
+    }
 
     func makeUIView(context: Context) -> some UIView {
         frontend.canvas
