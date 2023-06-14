@@ -12,7 +12,7 @@
 #import "PuzzleMenu.h"
 
 #define AssertOnMain() do { NSAssert(NSThread.isMainThread, @"Not called on main thread"); } while (0)
-#define AssertHasGame() do { NSAssert(self.hasGame, @""); } while (0)
+#define AssertHasGame() do { NSAssert(self.hasGame, @"No game found"); } while (0)
 
 NSString * const PuzzleErrorDomain = @"PuzzleErrorDomain";
 
@@ -322,8 +322,9 @@ void get_random_seed(void **randseed, int *randseedsize) {
 
 - (void)redraw {
     AssertOnMain();
-    AssertHasGame();
-    midend_redraw(self.midend);
+    // TODO: Figure this out
+//    AssertHasGame();
+    if (self.hasGame) midend_redraw(self.midend);
 }
 
 void fe_write(void *ctx, const void *buf, int len) {

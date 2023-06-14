@@ -12,7 +12,9 @@ struct GameCanvasWrapper: UIViewRepresentable {
     let frontend: PuzzleFrontend
 
     func updateUIView(_ uiView: UIViewType, context: Context) {
-        frontend.redraw()
+        if uiView.frame != .zero {
+            frontend.redraw()
+        }
     }
 
     func makeUIView(context: Context) -> some UIView {

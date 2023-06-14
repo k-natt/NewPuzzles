@@ -335,7 +335,7 @@ static void canvas_draw_circle(void *handle, int cx, int cy, int radius, int fil
     CGContextRef context = UIGraphicsGetCurrentContext();
     assert(context);
 
-    CGRect bounds = CGRectMake(cx - radius, cy - radius, 2 * radius, 2 * radius);
+    CGRect bounds = CGRectMake(cx - radius + 0.5, cy - radius + 0.5, 2 * radius - 1, 2 * radius - 1);
 
 //    UIImage *before = UIGraphicsGetImageFromCurrentImageContext();
 

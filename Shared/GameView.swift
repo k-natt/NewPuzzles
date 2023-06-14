@@ -21,18 +21,35 @@ struct GameView: View {
     @State var showSettings = false
 
     var body: some View {
-        VStack {
-            if gameViewModel.isLoading {
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                GameCanvasWrapper(frontend: gameViewModel.frontend)
-                StatusBar(model: gameViewModel)
-                GameButtons(buttons: gameViewModel.puzzleButtons)
+        // Need to wrap in a NavigationView for the toolbar
+        NavigationView {
+            VStack {
+                if gameViewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    GameCanvasWrapper(frontend: gameViewModel.frontend)
+                    StatusBar(model: gameViewModel)
+                    GameButtons(buttons: gameViewModel.puzzleButtons)
+                }
+            }
+            .background(Color("default_background"))
+            .toolbar {
+                GameToolbar(
+                    gameViewModel: gameViewModel,
+                    showSettings: $showSettings,
+                    showGameMenu: $showGameMenu,
+                    helpURL: $helpURL
+                )
+            }
+            .sheet(item: $helpURL) {
+                HelpView(url: $0)
+            }
+            .onDisappear {
+                gameViewModel.save()
             }
         }
-        .background(Color("default_background"))
         .navigationTitle(gameViewModel.puzzleName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -47,42 +64,59 @@ struct GameView: View {
                     EmptyView()
                 }
             }
-            ToolbarItem(placement: .bottomBar) {
-                GameMenuButton(model: gameViewModel)
-            }
-            ToolbarItemGroup(placement: .bottomBar) {
-                Button {
-                    gameViewModel.undo()
-                } label: {
-                    Label("Undo", systemImage: "arrow.uturn.backward")
-                }
-                .disabled(!gameViewModel.canUndo)
-                Button {
-                    gameViewModel.redo()
-                } label: {
-                    Label("Redo", systemImage: "arrow.uturn.forward")
-                }
-                .disabled(!gameViewModel.canRedo)
-            }
-            ToolbarItem(placement: .bottomBar) {
-                Button {
-                    showSettings = true
-                } label: {
-                    Label("Type", systemImage: "gearshape")
-                }
-                .sheet(isPresented: $showSettings) {
-                    NavigationView {
-                        GameSettings(model: gameViewModel, menu: gameViewModel.presetMenu())
+        }
+        .sheet(isPresented: $showSettings) {
+            NavigationView {
+                GameSettings(model: gameViewModel, menu: gameViewModel.presetMenu())
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(role: .cancel) {
+                                showSettings = false
+                            } label: {
+                                Label("Cancel", systemImage: "x.circle")
+                            }
+                        }
                     }
-                }
             }
         }
-        .sheet(item: $helpURL) {
-            HelpView(url: $0)
+        .confirmationDialog("Game", isPresented: $showGameMenu) {
+            GameMenu(model: gameViewModel)
         }
-        .onDisappear {
-            gameViewModel.save()
+    }
+}
+
+private struct GameToolbar: ToolbarContent {
+    @StateObject var gameViewModel: GameViewModel
+    @Binding var showSettings: Bool
+    @Binding var showGameMenu: Bool
+    @Binding var helpURL: URL?
+
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .bottomBar) {
+            GameMenuButton(model: gameViewModel, showSheet: $showGameMenu)
         }
+        ToolbarItemGroup(placement: .bottomBar) {
+            Button {
+                gameViewModel.undo()
+            } label: {
+                Label("Undo", systemImage: "arrow.uturn.backward")
+            }
+            .disabled(!gameViewModel.canUndo)
+            Button {
+                gameViewModel.redo()
+            } label: {
+                Label("Redo", systemImage: "arrow.uturn.forward")
+            }
+            .disabled(!gameViewModel.canRedo)
+        }
+        ToolbarItem(placement: .bottomBar) {
+            Button {
+                showSettings = true
+            } label: {
+                Label("Type", systemImage: "gearshape")
+            }
+        }
+
     }
 }
 
@@ -154,8 +188,7 @@ private enum GameMenuResult {
 
 private struct GameMenuButton: View {
     let model: GameViewModel
-
-    @State var showSheet = false
+    @Binding var showSheet: Bool
 
     var body: some View {
         Button {
@@ -163,23 +196,28 @@ private struct GameMenuButton: View {
         } label: {
             Label("Game", systemImage: "gamecontroller")
         }
-        .confirmationDialog("Game", isPresented: $showSheet) {
-            Button("New Game", role: .destructive) {
-                model.newGame()
-            }
+    }
+}
+
+private struct GameMenu: View {
+    let model: GameViewModel
+
+    var body: some View {
+        Button("New Game", role: .destructive) {
+            model.newGame()
+        }
 //            Button("Load Game") {
 //                //
 //            }
 //            Button("Load by Seed") {
 //                //
 //            }
-            Button("Restart Game") {
-                model.restartGame()
-            }
-            if (model.canSolve) {
-                Button("Solve") {
-                    model.solve()
-                }
+        Button("Restart Game") {
+            model.restartGame()
+        }
+        if (model.canSolve) {
+            Button("Solve") {
+                model.solve()
             }
         }
     }

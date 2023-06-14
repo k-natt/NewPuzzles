@@ -21,11 +21,13 @@ struct GameList: View {
     @State var presentingImport = false
 
     init() {
+//        let textColor = UIColor(resource: .text)
+        let textColor = UIColor(named: "text")!
         UINavigationBar.appearance().titleTextAttributes = [
-            .foregroundColor: UIColor(named: "text")!
+            .foregroundColor: textColor
         ]
         UINavigationBar.appearance().largeTitleTextAttributes = [
-            .foregroundColor: UIColor(named: "text")!
+            .foregroundColor: textColor
         ]
     }
     var body: some View {
