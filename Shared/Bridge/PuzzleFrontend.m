@@ -151,10 +151,7 @@ void get_random_seed(void **randseed, int *randseedsize) {
     return [mary copy];
 }
 
-- (NSArray<PuzzleButton *> *)buttons {
-    if (_buttons) {
-        return _buttons;
-    }
+- (void)updateButtons {
     NSMutableArray *mary = [NSMutableArray new];
     // We'll need this for the blocks later, may as well make it once now.
     __weak __typeof(self) welf = self;
@@ -177,8 +174,7 @@ void get_random_seed(void **randseed, int *randseedsize) {
         [mary addObject:btn];
     }
     free(keys);
-    _buttons = [mary copy];
-    return _buttons;
+    self.buttons = mary;
 }
 
 - (void)newGame:(void (^)(void))completion {
@@ -195,6 +191,7 @@ void get_random_seed(void **randseed, int *randseedsize) {
             if (midend_tilesize(self.midend)) {
                 midend_redraw(self.midend);
             }
+            [self updateButtons];
             [self updateProperties];
             if (completion) completion();
         });
@@ -270,11 +267,40 @@ void get_random_seed(void **randseed, int *randseedsize) {
     return [PuzzleMenuEntry parse:menu];
 }
 
-- (void)applyPreset:(PuzzleMenuPreset *)preset {
+- (void)applyParams:(struct game_params *)params {
     AssertOnMain();
     self.hasGame = false;
-    midend_set_params(self.midend, preset.params);
+    midend_set_params(self.midend, params);
     [self newGame:^{}];
+}
+
+- (void)applyPreset:(PuzzleMenuPreset *)preset {
+    [self applyParams:preset.params];
+}
+
+static struct game_params * _Nullable find_params(int presetId, struct preset_menu *menu) {
+    int idx = 0;
+    while (idx < menu->n_entries) {
+        if (menu->entries[idx].id == presetId) {
+            return menu->entries[idx].params;
+        } else if (menu->entries[idx].submenu) {
+            struct game_params *paramsFromSubmenu = find_params(presetId, menu->entries[idx].submenu);
+            if (paramsFromSubmenu) return paramsFromSubmenu;
+        }
+
+        idx += 1;
+    }
+    return NULL;
+}
+
+- (BOOL)applyPresetId:(NSInteger)presetId {
+    NSParameterAssert(presetId <= INT_MAX);
+    struct game_params *params = find_params((int)presetId, midend_get_presets(self.midend, NULL));
+    if (params) {
+        [self applyParams:params];
+        return YES;
+    }
+    return NO;
 }
 
 - (NSInteger)currentPresetId {
@@ -341,6 +367,38 @@ void fe_write(void *ctx, const void *buf, int len) {
     return [data copy];
 }
 
+- (NSString *)gameSeed {
+    char *seed = midend_get_random_seed(self.midend);
+    if (seed) {
+        NSString *str = [NSString stringWithCString:seed encoding:NSASCIIStringEncoding];
+        free(seed);
+        return str;
+    }
+    return nil;
+}
+
+- (NSString *)gameStateExportable {
+    char *state = midend_text_format(self.midend);
+    if (state) {
+        NSString *str = [NSString stringWithCString:state encoding:NSASCIIStringEncoding];
+        free(state);
+        return str;
+    }
+    return nil;
+
+}
+
+- (NSString *)gameSettingsExportable {
+    char *settings = midend_text_format(self.midend);
+    if (settings) {
+        NSString *str = [NSString stringWithCString:settings encoding:NSASCIIStringEncoding];
+        free(settings);
+        return str;
+    }
+    return nil;
+
+}
+
 struct read_context {
     NSData *data;
     NSUInteger pos;
@@ -388,6 +446,7 @@ bool fe_read(void *ctx, void *buf, int len) {
         return false;
     }
     self.hasGame = true;
+    [self updateButtons];
     [self updateProperties];
     return true;
 }

@@ -38,4 +38,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface PuzzleMenuCustom : NSObject
+
+@end
+
 NS_ASSUME_NONNULL_END

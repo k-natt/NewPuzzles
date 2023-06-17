@@ -19,6 +19,7 @@ extern NSString * const PuzzleErrorDomain;
 @class PuzzleMenuPreset;
 
 typedef NSError *_Nullable __autoreleasing *_Nullable NSErrorPointer;
+
 @interface PuzzleButton: NSObject
 
 @property (readonly) NSString *label;
@@ -46,11 +47,11 @@ typedef NS_ENUM(NSUInteger, PuzzleFrontendStatus) {
 @property (readonly) GameCanvas *canvas;
 
 // Static, don't need to KVO
-@property (readonly) NSArray<PuzzleButton *> *buttons;
 @property (readonly) BOOL wantsStatusBar;
 
 // KVO-able
 @property (readonly, nullable) NSString *statusText;
+@property (readonly) NSArray<PuzzleButton *> *buttons;
 @property (readonly) BOOL canSolve;
 @property (readonly) BOOL canUndo;
 @property (readonly) BOOL canRedo;
@@ -62,11 +63,17 @@ typedef NS_ENUM(NSUInteger, PuzzleFrontendStatus) {
 // Generates in the background, calls completion on main queue when done.
 - (void)newGame:(void(^)(void))completion;
 - (void)restart;
-// If return value is nonnull, it is an error description for the user.
 - (BOOL)solveWithError:(NSErrorPointer)error;
 
 // Returns nil if game is over. No sense saving a failed or won game.
 - (nullable NSData *)save;
+
+// Documentatino says gameSeed could contain non-ascii, but the code suggests
+// it should always be a decimal number. So export as string for now I guess.
+- (nullable NSString *)gameSeed;
+- (nullable NSString *)gameStateExportable;
+- (nullable NSString *)gameSettingsExportable;
+
 // Returns nil on success, error message on failure.
 - (BOOL)restore:(NSData *)save error:(NSErrorPointer)error;
 + (nullable Puzzle *)identify:(NSData *)data error:(NSErrorPointer)error;
@@ -76,6 +83,7 @@ typedef NS_ENUM(NSUInteger, PuzzleFrontendStatus) {
 
 // Must call newGame after.
 - (void)applyPreset:(PuzzleMenuPreset *)preset;
+- (BOOL)applyPresetId:(NSInteger)presetId;
 
 - (void)undo;
 - (void)redo;

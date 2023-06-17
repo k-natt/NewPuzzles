@@ -48,14 +48,14 @@ struct GameList: View {
                     } label: {
                         Label("Import", systemImage: "square.and.arrow.down")
                     }
-                    .sheet(isPresented: $presentingImport) {
-                        if !loadText.isEmpty {
-                            selectedPuzzle = GameViewModel.puzzleForSave(Data(loadText.utf8))
-                        }
-                    } content: {
-                        TextInputScreen(title: "Paste save string", text: $loadText, placeholder: "SAVEFILE:Simon Tatham's Portable Puzzle Collection:VERSION:1:GAME:")
-                    }
                 }
+            }
+            .sheet(isPresented: $presentingImport) {
+                if !loadText.isEmpty {
+                    selectedPuzzle = GameViewModel.puzzleForSave(Data(loadText.utf8))
+                }
+            } content: {
+                TextInputScreen(title: "Paste save string", text: $loadText, placeholder: "SAVEFILE:Simon Tatham's Portable Puzzle Collection:VERSION:1:GAME:")
             }
         }
     }

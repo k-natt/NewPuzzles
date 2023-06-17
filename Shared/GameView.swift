@@ -19,55 +19,43 @@ struct GameView: View {
     @State var helpURL: URL? = nil
     @State var showGameMenu = false
     @State var showSettings = false
+    @State var showExportMenu = false
 
     var body: some View {
         // Need to wrap in a NavigationView for the toolbar
-        NavigationView {
-            VStack {
-                if gameViewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    GameCanvasWrapper(frontend: gameViewModel.frontend)
-                    StatusBar(model: gameViewModel)
-                    GameButtons(buttons: gameViewModel.puzzleButtons)
-                }
+        VStack {
+            if gameViewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                GameCanvasWrapper(frontend: gameViewModel.frontend)
+                StatusBar(model: gameViewModel)
+                GameButtons(buttons: gameViewModel.puzzleButtons)
+                Spacer(minLength: 25)
+                GameUndoRedoBar(model: gameViewModel)
+                Spacer(minLength: 40)
             }
-            .background(Color("default_background"))
-            .toolbar {
-                GameToolbar(
-                    gameViewModel: gameViewModel,
-                    showSettings: $showSettings,
-                    showGameMenu: $showGameMenu,
-                    helpURL: $helpURL
-                )
-            }
-            .sheet(item: $helpURL) {
-                HelpView(url: $0)
-            }
-            .onDisappear {
-                gameViewModel.save()
-            }
+        }
+        .background(Color("default_background"))
+        .sheet(item: $helpURL) {
+            HelpView(url: $0)
+        }
+        .onDisappear {
+            gameViewModel.save()
         }
         .navigationTitle(gameViewModel.puzzleName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if let helpURL = gameViewModel.puzzleHelpURL {
-                    Button {
-                        self.helpURL = helpURL
-                    } label: {
-                        Label("Help", systemImage: "questionmark.circle")
-                    }
-                } else {
-                    EmptyView()
-                }
+            ToolbarItem(placement: .automatic) {
+                GameMenuButton(model: gameViewModel, showSheet: $showGameMenu)
             }
+
         }
         .sheet(isPresented: $showSettings) {
             NavigationView {
                 GameSettings(model: gameViewModel, menu: gameViewModel.presetMenu())
+                    .navigationTitle("Settings")
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
                             Button(role: .cancel) {
@@ -79,49 +67,27 @@ struct GameView: View {
                     }
             }
         }
+        .confirmationDialog("Export", isPresented: $showExportMenu) {
+            Button("Copy game state") {
+                UIPasteboard.general.string = gameViewModel.exportState()
+            }
+            Button("Copy game settings") {
+                UIPasteboard.general.string = gameViewModel.exportSettings()
+            }
+            Button("Copy game seed") {
+                UIPasteboard.general.string = gameViewModel.exportSeed()
+            }
+            Button("Export save file") {
+                gameViewModel.shareAsFile()
+            }
+        }
         .confirmationDialog("Game", isPresented: $showGameMenu) {
-            GameMenu(model: gameViewModel)
+            GameMenu(model: gameViewModel, showSettings: $showSettings, showExport: $showExportMenu, helpURL: $helpURL)
         }
-    }
-}
-
-private struct GameToolbar: ToolbarContent {
-    @StateObject var gameViewModel: GameViewModel
-    @Binding var showSettings: Bool
-    @Binding var showGameMenu: Bool
-    @Binding var helpURL: URL?
-
-    var body: some ToolbarContent {
-        ToolbarItem(placement: .bottomBar) {
-            GameMenuButton(model: gameViewModel, showSheet: $showGameMenu)
-        }
-        ToolbarItemGroup(placement: .bottomBar) {
-            Button {
-                gameViewModel.undo()
-            } label: {
-                Label("Undo", systemImage: "arrow.uturn.backward")
-            }
-            .disabled(!gameViewModel.canUndo)
-            Button {
-                gameViewModel.redo()
-            } label: {
-                Label("Redo", systemImage: "arrow.uturn.forward")
-            }
-            .disabled(!gameViewModel.canRedo)
-        }
-        ToolbarItem(placement: .bottomBar) {
-            Button {
-                showSettings = true
-            } label: {
-                Label("Type", systemImage: "gearshape")
-            }
-        }
-
     }
 }
 
 private struct GameSettings: View {
-
     let model: GameViewModel
     let menu: [PuzzleMenuEntry]
 
@@ -154,6 +120,30 @@ private struct GameSettings: View {
     }
 }
 
+private struct GameUndoRedoBar: View {
+    @StateObject var model: GameViewModel
+
+    var body: some View {
+        HStack {
+            Spacer()
+            Button {
+                model.undo()
+            } label: {
+                Label("Undo", systemImage: "arrow.uturn.backward")
+            }
+            .disabled(!model.canUndo)
+            Spacer()
+            Button {
+                model.redo()
+            } label: {
+                Label("Redo", systemImage: "arrow.uturn.forward")
+            }
+            .disabled(!model.canRedo)
+            Spacer()
+        }
+    }
+}
+
 private struct GameButtons: View {
     let buttons: [PuzzleButton]
 
@@ -161,7 +151,6 @@ private struct GameButtons: View {
         if buttons.isEmpty {
             EmptyView()
         } else {
-//            LazyVGrid(columns: [GridItem(.adaptive(minimum: 40))]) {
             HStack(alignment: .center, spacing: 8) {
                 Spacer()
                 ForEach(buttons, id: \.self) { btn in
@@ -201,6 +190,9 @@ private struct GameMenuButton: View {
 
 private struct GameMenu: View {
     let model: GameViewModel
+    @Binding var showSettings: Bool
+    @Binding var showExport: Bool
+    @Binding var helpURL: URL?
 
     var body: some View {
         Button("New Game", role: .destructive) {
@@ -220,6 +212,25 @@ private struct GameMenu: View {
                 model.solve()
             }
         }
+        Button {
+            showSettings = true
+        } label: {
+            Label("Settings", systemImage: "gearshape")
+        }
+        Button {
+            showExport = true
+        } label: {
+            Label("Export", systemImage: "square.and.arrow.up")
+        }
+        if let helpURL = model.puzzleHelpURL {
+            Button {
+                self.helpURL = helpURL
+            } label: {
+                Label("Help", systemImage: "questionmark.circle")
+            }
+        } else {
+            EmptyView()
+        }
     }
 }
 
@@ -230,9 +241,8 @@ private struct StatusBar: View {
     var body: some View {
         if model.wantsStatusBar {
             Text(model.statusText ?? " ")
-                .padding(8.0)
-                .frame(height: 40)
                 .foregroundColor(Color("text"))
+                .minimumScaleFactor(0.5)
         } else {
             EmptyView()
         }

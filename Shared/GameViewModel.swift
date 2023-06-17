@@ -11,8 +11,8 @@ import SwiftUI
 class GameViewModel: ObservableObject {
     let puzzleName: String
     let puzzleHelpURL: URL?
-    let puzzleButtons: [PuzzleButton]
 
+    @Published private(set) var puzzleButtons: [PuzzleButton]
     @Published private(set) var statusText: String?
     @Published private(set) var wantsStatusBar = false
     @Published private(set) var canUndo = false
@@ -28,8 +28,10 @@ class GameViewModel: ObservableObject {
 
     @Published var isLoading = false
 
+    // These will be dynamically created based on the current game.
     @AppStorage("") private var saveState: Data?
     @AppStorage("") private var preset: Int = -1
+//    @AppStorage("") private var lastSelectedPreset: Int
 
     let puzzle: Puzzle
     let frontend: PuzzleFrontend
@@ -57,6 +59,7 @@ class GameViewModel: ObservableObject {
         frontend.publisher(for: \.canSolve).receive(on: DispatchQueue.main).assign(to: &$canSolve)
         frontend.publisher(for: \.inProgress).receive(on: DispatchQueue.main).assign(to: &$inProgress)
         frontend.publisher(for: \.statusText).receive(on: DispatchQueue.main).assign(to: &$statusText)
+        frontend.publisher(for: \.buttons).receive(on: DispatchQueue.main).assign(to: &$puzzleButtons)
         frontend.publisher(for: \.wantsStatusBar).receive(on: DispatchQueue.main).assign(to: &$wantsStatusBar)
 
         NotificationCenter.default.addObserver(self, selector: #selector(save(_:)), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -68,6 +71,8 @@ class GameViewModel: ObservableObject {
                 NSLog("Error restoring game data: \(error)");
                 newGame()
             }
+        } else if preset >= 0 {
+            frontend.applyPresetId(preset)
         } else {
             newGame()
         }
@@ -120,6 +125,31 @@ class GameViewModel: ObservableObject {
 
     func updateGameType(to preset: PuzzleMenuPreset) {
         frontend.apply(preset)
+        self.preset = frontend.currentPresetId()
+    }
+
+    func exportSeed() -> String? { frontend.gameSeed() }
+    func exportState() -> String? { frontend.gameStateExportable() }
+    func exportSettings() -> String? { frontend.gameSettingsExportable() }
+
+    func shareAsFile() {
+        guard let vc = UIApplication.shared.windows.first?.rootViewController else {
+            NSLog("Failed to find root view controller")
+            return
+        }
+        guard let saveData = frontend.save() else {
+            NSLog("Failed to save game for export")
+            return
+        }
+        let path = "\(NSTemporaryDirectory())/\(puzzle.name).save"
+        do {
+            try saveData.write(to: URL(fileURLWithPath: path), options: .atomic)
+        } catch {
+            NSLog("Failed to write game for export: \(error)")
+            return
+        }
+        let uav = UIActivityViewController(activityItems: [NSURL(fileURLWithPath: path)], applicationActivities: [])
+        vc.present(uav, animated: true)
     }
 
     deinit {
