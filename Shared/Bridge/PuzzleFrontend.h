@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString * const PuzzleErrorDomain;
+extern NSErrorDomain const PuzzleErrorDomain;
 // No specific codes
 
 @class Puzzle;

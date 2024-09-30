@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 
-extension URL: Identifiable {
+extension URL: @retroactive Identifiable {
     public var id: URL { self }
 }
 
@@ -31,6 +31,14 @@ struct GameView: View {
             } else {
                 GameCanvasWrapper(frontend: gameViewModel.frontend)
                 StatusBar(model: gameViewModel)
+                if !self.gameViewModel.inProgress {
+//                    Spacer(minLength: 25)
+                    Button {
+                        self.gameViewModel.newGame()
+                    } label: {
+                        Text("New Game")
+                    }
+                }
                 GameButtons(buttons: gameViewModel.puzzleButtons)
                 Spacer(minLength: 25)
                 GameUndoRedoBar(model: gameViewModel)
@@ -40,6 +48,17 @@ struct GameView: View {
         .background(Color("default_background"))
         .sheet(item: $helpURL) {
             HelpView(url: $0)
+        }
+        .onAppear {
+            UIApplication
+                .shared
+                .connectedScenes
+                .compactMap({ $0 as? UIWindowScene }).first?
+                .windows.first?
+                .rootViewController?
+                .navigationController?
+                .interactivePopGestureRecognizer?
+                .isEnabled = false
         }
         .onDisappear {
             gameViewModel.save()

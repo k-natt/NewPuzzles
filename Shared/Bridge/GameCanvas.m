@@ -97,7 +97,7 @@ struct blitter {
 - (void)tap:(UITapGestureRecognizer *)gr {
     assert(gr.state == UIGestureRecognizerStateRecognized);
     CGPoint touchPoint = [gr locationInView:self.canvasView];
-//    NSLog(@"Tap at %@", NSStringFromCGPoint(touchPoint));
+    NSLog(@"Tap at %@", NSStringFromCGPoint(touchPoint));
     if (!CGRectContainsPoint(self.canvasView.bounds, touchPoint)) return;
 
     [self.delegate interaction:LEFT_BUTTON at:touchPoint];
@@ -130,7 +130,7 @@ struct blitter {
 
 - (void)drag:(UIPanGestureRecognizer *)gr {
     CGPoint point = [gr locationInView:self.canvasView];
-//    NSLog(@"Drag state %d point %@", (int)gr.state, NSStringFromCGPoint(point));
+    NSLog(@"Drag state %d point %@", (int)gr.state, NSStringFromCGPoint(point));
     switch (gr.state) {
         case UIGestureRecognizerStateBegan:
             [self.delegate interaction:LEFT_BUTTON at:self.initialTouch];
