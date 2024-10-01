@@ -360,7 +360,8 @@ void fe_write(void *ctx, const void *buf, int len) {
 
 - (NSData *)save {
     AssertOnMain();
-    AssertHasGame();
+//    AssertHasGame();
+    if (!self.hasGame) return nil;
     if (!self.inProgress) return nil;
     NSMutableData *data = [NSMutableData new];
     midend_serialise(self.midend, fe_write, (__bridge void *)data);
@@ -427,7 +428,7 @@ bool fe_read(void *ctx, void *buf, int len) {
     if (emsg) {
         if (error) *error = [NSError puzzleErrorWithMessage:emsg];
     } else {
-        puzzle = [[Puzzle alloc] initWithRawValue:[NSString stringWithUTF8String:name]];
+        puzzle = [Puzzle puzzleForName:[NSString stringWithUTF8String:name]];
         if (!puzzle && error) *error = [NSError puzzleErrorWithMessage:"Unknown puzzle type"];
         sfree(name);
     }

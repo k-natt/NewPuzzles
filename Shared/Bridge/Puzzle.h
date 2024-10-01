@@ -22,10 +22,9 @@ typedef struct game game;
 @property (readonly) NSString *helpName;
 
 - (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
 
-// Unfortunately this has to be here for RawRepresentable conformance, letting
-// us use @AppStorage for puzzles directly, which makes things way easier.
-- (nullable instancetype)initWithRawValue:(NSString *)value;
++ (nullable Puzzle *)puzzleForName:(NSString *)name NS_SWIFT_NAME(init(named:));
 
 @end
 

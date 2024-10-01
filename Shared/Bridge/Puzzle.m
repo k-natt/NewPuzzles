@@ -11,6 +11,15 @@
 
 @implementation Puzzle
 
++ (Puzzle *)puzzleForName:(NSString *)name {
+    for (Puzzle *game in Puzzle.allPuzzles) {
+        if ([game.name isEqualToString:name]) {
+            return game;
+        }
+    }
+    return nil;
+}
+
 + (NSArray<Puzzle *> *)allPuzzles {
     static NSArray<Puzzle *> *puzzles;
 
@@ -32,15 +41,6 @@
     _name = [NSString stringWithUTF8String:game->name];
     _helpName = [NSString stringWithUTF8String:game->htmlhelp_topic];
     return self;
-}
-
-- (instancetype)initWithRawValue:(NSString *)value {
-    for (Puzzle *game in Puzzle.allPuzzles) {
-        if ([game.name isEqualToString:value]) {
-            return game;
-        }
-    }
-    return nil;
 }
 
 @end

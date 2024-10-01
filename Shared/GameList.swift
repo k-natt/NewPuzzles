@@ -11,58 +11,56 @@ extension Puzzle: Identifiable {
     public var id: String { name }
 }
 
-extension Puzzle: RawRepresentable {
-    public var rawValue: String { name }
-}
-
 struct GameList: View {
-    @AppStorage("lastPlayed") var selectedPuzzle: Puzzle?
+//    @AppStorage("lastPlayed") var selectedPuzzle: PuzzleWrapper?
+    @Environment(\.pushPuzzle) var pushPuzzle
     @State var loadText: String = ""
     @State var presentingImport = false
 
-    init() {
-//        let textColor = UIColor(resource: .text)
-        let textColor = UIColor(named: "text")!
-        UINavigationBar.appearance().titleTextAttributes = [
-            .foregroundColor: textColor
-        ]
-        UINavigationBar.appearance().largeTitleTextAttributes = [
-            .foregroundColor: textColor
-        ]
-    }
     var body: some View {
-        NavigationView {
-            List(Puzzle.allPuzzles, selection: $selectedPuzzle) { puzzle in
-                NavigationLink(tag: puzzle, selection: $selectedPuzzle) {
-                    GameView(gameViewModel: GameViewModel(puzzle: puzzle, loadData: loadText.isEmpty ? nil : Data(loadText.utf8)))
+        List(Puzzle.allPuzzles) { puzzle in
+            NavigationLink(to: puzzle) {
+                Text(puzzle.name)
+            }
+//            NavigationLink(value: puzzle) {
+//                Text(puzzle.name)
+//            }
+//            Button {
+//                pushPuzzle(puzzle)
+////                self.selectedPuzzle = .init(puzzle: puzzle)
+//            } label: {
+//                Text(puzzle.name)
+//            }
+        }
+        .puzzleDestination { puzzle in
+            GameView(gameViewModel: GameViewModel(puzzle: puzzle, loadData: loadText.isEmpty ? nil : Data(loadText.utf8)))
+        }
+//        .navigationDestination(item: $selectedPuzzle, destination: { puzzle in
+//            GameView(gameViewModel: GameViewModel(puzzle: puzzle, loadData: loadText.isEmpty ? nil : Data(loadText.utf8)))
+//        })
+        .navigationTitle("Puzzles")
+        .toolbar {
+            ToolbarItem {
+                Button {
+                    presentingImport = true
                 } label: {
-                    Text(puzzle.name)
-                        .foregroundColor(Color("text"))
+                    Label("Import", systemImage: "square.and.arrow.down")
                 }
             }
-            .navigationTitle("Puzzles")
-            .toolbar {
-                ToolbarItem {
-                    Button {
-                        presentingImport = true
-                    } label: {
-                        Label("Import", systemImage: "square.and.arrow.down")
-                    }
-                }
+        }
+        .sheet(isPresented: $presentingImport) {
+            if !loadText.isEmpty,
+                let puzzle = GameViewModel.puzzleForSave(Data(loadText.utf8)) {
+//                selectedPuzzle = GameViewModel.puzzleForSave(Data(loadText.utf8))
+                pushPuzzle(puzzle)
             }
-            .sheet(isPresented: $presentingImport) {
-                if !loadText.isEmpty {
-                    selectedPuzzle = GameViewModel.puzzleForSave(Data(loadText.utf8))
-                }
-            } content: {
-                TextInputScreen(title: "Paste save string", text: $loadText, placeholder: "SAVEFILE:Simon Tatham's Portable Puzzle Collection:VERSION:1:GAME:")
-            }
+        } content: {
+            TextInputScreen(title: "Paste save string", text: $loadText, placeholder: "SAVEFILE:Simon Tatham's Portable Puzzle Collection:VERSION:1:GAME:")
         }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        GameList()
-    }
+#Preview {
+//    @Previewable @State var cachedPath: Data? = nil
+//    NavigationHelper(cachedPath: $cachedPath)
 }

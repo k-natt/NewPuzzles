@@ -143,6 +143,10 @@
 		0A267918277C3DF2003484A0 /* Puzzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A267916277C3DF2003484A0 /* Puzzle.m */; };
 		0A26791C277E743F003484A0 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A26791B277E743F003484A0 /* GameViewModel.swift */; };
 		0A26791D277E743F003484A0 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A26791B277E743F003484A0 /* GameViewModel.swift */; };
+		0A282FB62CAB32E4001CAD1A /* NavigationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A282FB52CAB32E4001CAD1A /* NavigationHelper.swift */; };
+		0A282FB72CAB32E4001CAD1A /* NavigationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A282FB52CAB32E4001CAD1A /* NavigationHelper.swift */; };
+		0A282FBC2CAB40C6001CAD1A /* PuzzleWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A282FBB2CAB40C2001CAD1A /* PuzzleWrapper.swift */; };
+		0A282FBD2CAB40C6001CAD1A /* PuzzleWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A282FBB2CAB40C2001CAD1A /* PuzzleWrapper.swift */; };
 		0AC0725C278167D900B6B66C /* PuzzleMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0725B278167D900B6B66C /* PuzzleMenu.m */; };
 		0AC0725D278167D900B6B66C /* PuzzleMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AC0725B278167D900B6B66C /* PuzzleMenu.m */; };
 		0ACA9499277B7A2B00770D32 /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACA9498277B7A2B00770D32 /* GameView.swift */; };
@@ -330,6 +334,8 @@
 		0A267915277C3DF2003484A0 /* Puzzle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Puzzle.h; sourceTree = "<group>"; };
 		0A267916277C3DF2003484A0 /* Puzzle.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Puzzle.m; sourceTree = "<group>"; };
 		0A26791B277E743F003484A0 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
+		0A282FB52CAB32E4001CAD1A /* NavigationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationHelper.swift; sourceTree = "<group>"; };
+		0A282FBB2CAB40C2001CAD1A /* PuzzleWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PuzzleWrapper.swift; sourceTree = "<group>"; };
 		0AC0725A278167D900B6B66C /* PuzzleMenu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PuzzleMenu.h; sourceTree = "<group>"; };
 		0AC0725B278167D900B6B66C /* PuzzleMenu.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PuzzleMenu.m; sourceTree = "<group>"; };
 		0ACA9498277B7A2B00770D32 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
@@ -417,18 +423,20 @@
 		0A0AF425277A7FE200EAC742 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				0A267914277C39EE003484A0 /* Bridge */,
 				0A0AF428277A7FE300EAC742 /* Assets.xcassets */,
+				0A267914277C39EE003484A0 /* Bridge */,
 				0A0AF503277A9DF200EAC742 /* Bridging-header.h */,
+				0A154BCE278262B70014B9A5 /* Delay.swift */,
 				0ACA95B2277BD09600770D32 /* GameCanvasWrapper.swift */,
 				0A0AF427277A7FE200EAC742 /* GameList.swift */,
 				0ACA9498277B7A2B00770D32 /* GameView.swift */,
-				0ACA949B277B7E0E00770D32 /* HelpView.swift */,
-				0A0AF426277A7FE200EAC742 /* NewPuzzlesApp.swift */,
-				0ACA9520277B94C400770D32 /* WebView.swift */,
 				0A26791B277E743F003484A0 /* GameViewModel.swift */,
-				0A154BCE278262B70014B9A5 /* Delay.swift */,
+				0ACA949B277B7E0E00770D32 /* HelpView.swift */,
+				0A282FB52CAB32E4001CAD1A /* NavigationHelper.swift */,
+				0A282FBF2CAB55B0001CAD1A /* Models */,
 				0A154BD1278ACEE30014B9A5 /* TextInput.swift */,
+				0A282FBE2CAB558A001CAD1A /* Views */,
+				0ACA9520277B94C400770D32 /* WebView.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -540,6 +548,22 @@
 			path = Bridge;
 			sourceTree = "<group>";
 		};
+		0A282FBE2CAB558A001CAD1A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				0A0AF426277A7FE200EAC742 /* NewPuzzlesApp.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		0A282FBF2CAB55B0001CAD1A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0A282FBB2CAB40C2001CAD1A /* PuzzleWrapper.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		0ACA9526277BBFB100770D32 /* Help */ = {
 			isa = PBXGroup;
 			children = (
@@ -637,7 +661,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1320;
-				LastUpgradeCheck = 1320;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					0A0AF42C277A7FE300EAC742 = {
 						CreatedOnToolsVersion = 13.2.1;
@@ -790,6 +814,7 @@
 				0A154BCF278262B70014B9A5 /* Delay.swift in Sources */,
 				0A0AF46E277A811100EAC742 /* pearl.c in Sources */,
 				0A0AF438277A7FE300EAC742 /* GameList.swift in Sources */,
+				0A282FB72CAB32E4001CAD1A /* NavigationHelper.swift in Sources */,
 				0A0AF47A277A811200EAC742 /* bridges.c in Sources */,
 				0A0AF4C4277A81B500EAC742 /* grid.c in Sources */,
 				0A0AF482277A811200EAC742 /* solo.c in Sources */,
@@ -838,6 +863,7 @@
 				0A0AF4D6277A8DFA00EAC742 /* matching.c in Sources */,
 				0A0AF4EA277A8EB100EAC742 /* drawing.c in Sources */,
 				0A0AF47F277A811200EAC742 /* magnets.c in Sources */,
+				0A282FBD2CAB40C6001CAD1A /* PuzzleWrapper.swift in Sources */,
 				0ACA949C277B7E0E00770D32 /* HelpView.swift in Sources */,
 				0A267917277C3DF2003484A0 /* Puzzle.m in Sources */,
 				0A0AF493277A811200EAC742 /* signpost.c in Sources */,
@@ -870,6 +896,7 @@
 				0A154BD0278262B70014B9A5 /* Delay.swift in Sources */,
 				0A0AF49D277A812800EAC742 /* tents.c in Sources */,
 				0A0AF4A8277A812800EAC742 /* solo.c in Sources */,
+				0A282FB62CAB32E4001CAD1A /* NavigationHelper.swift in Sources */,
 				0A0AF4B4277A812800EAC742 /* palisade.c in Sources */,
 				0A0AF4C5277A81B500EAC742 /* grid.c in Sources */,
 				0A0AF499277A812800EAC742 /* map.c in Sources */,
@@ -918,6 +945,7 @@
 				0A0AF4D7277A8DFA00EAC742 /* matching.c in Sources */,
 				0A0AF4EB277A8EB100EAC742 /* drawing.c in Sources */,
 				0A0AF4AD277A812800EAC742 /* blackbox.c in Sources */,
+				0A282FBC2CAB40C6001CAD1A /* PuzzleWrapper.swift in Sources */,
 				0ACA949D277B7E0E00770D32 /* HelpView.swift in Sources */,
 				0A267918277C3DF2003484A0 /* Puzzle.m in Sources */,
 				0A0AF4B6277A812800EAC742 /* unequal.c in Sources */,
@@ -944,6 +972,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -974,9 +1003,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1004,6 +1035,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -1034,9 +1066,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1064,12 +1098,13 @@
 				DEVELOPMENT_TEAM = 35EA59WDZ9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1097,12 +1132,13 @@
 				DEVELOPMENT_TEAM = 35EA59WDZ9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1128,6 +1164,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35EA59WDZ9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -1157,6 +1194,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 35EA59WDZ9;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
